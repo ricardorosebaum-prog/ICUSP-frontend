@@ -247,16 +247,24 @@ const DetalhesProjeto = () => {
                 
                 <Separator />
                 
-                <div className="space-y-3">
-                  <div className="flex items-center">
-                    <Mail className="w-4 h-4 mr-3 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">{projeto.orientador.email}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Phone className="w-4 h-4 mr-3 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">{projeto.orientador.telefone}</span>
-                  </div>
-                </div>
+                 <div className="space-y-3">
+                   <div className="flex items-center">
+                     <Mail className="w-4 h-4 mr-3 text-muted-foreground" />
+                     <span className="text-sm text-muted-foreground">{projeto.orientador.email}</span>
+                   </div>
+                   <div className="flex items-center">
+                     <Phone className="w-4 h-4 mr-3 text-muted-foreground" />
+                     <span className="text-sm text-muted-foreground">{projeto.orientador.telefone}</span>
+                   </div>
+                 </div>
+                 
+                 <Separator />
+                 
+                 <Link to="/professor/1">
+                   <Button variant="outline" className="w-full">
+                     Ver Perfil Completo
+                   </Button>
+                 </Link>
               </CardContent>
             </Card>
 

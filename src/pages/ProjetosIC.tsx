@@ -120,16 +120,16 @@ const ProjetosIC = () => {
                 <CardTitle className="text-lg leading-tight">
                   {projeto.titulo}
                 </CardTitle>
-                <CardDescription className="flex items-center space-x-4 text-sm text-muted-foreground">
-                  <span className="flex items-center">
-                    <User className="w-4 h-4 mr-1" />
-                    {projeto.orientador}
-                  </span>
-                  <span className="flex items-center">
-                    <Calendar className="w-4 h-4 mr-1" />
-                    {projeto.duracao}
-                  </span>
-                </CardDescription>
+                 <CardDescription className="flex items-center space-x-4 text-sm text-muted-foreground">
+                   <Link to="/professor/1" className="flex items-center hover:text-primary transition-colors">
+                     <User className="w-4 h-4 mr-1" />
+                     {projeto.orientador}
+                   </Link>
+                   <span className="flex items-center">
+                     <Calendar className="w-4 h-4 mr-1" />
+                     {projeto.duracao}
+                   </span>
+                 </CardDescription>
               </CardHeader>
               
               <CardContent>
