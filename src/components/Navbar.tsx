@@ -1,10 +1,36 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, User, BookOpen, Home } from "lucide-react";
+import { Menu, X, User, BookOpen, Home, MessageSquare, Plus, LogOut } from "lucide-react";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userName, setUserName] = useState("");
+  const [userType, setUserType] = useState("");
+
+  useEffect(() => {
+    const checkAuth = () => {
+      const type = localStorage.getItem("userType");
+      const name = localStorage.getItem("userName");
+      setIsLoggedIn(!!type);
+      setUserType(type || "");
+      setUserName(name || "");
+    };
+    
+    checkAuth();
+    window.addEventListener("storage", checkAuth);
+    return () => window.removeEventListener("storage", checkAuth);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("userType");
+    localStorage.removeItem("userName");
+    setIsLoggedIn(false);
+    setUserName("");
+    setUserType("");
+    window.location.href = "/";
+  };
 
   return (
     <nav className="bg-background/95 backdrop-blur-sm border-b border-border sticky top-0 z-50">
@@ -34,16 +60,49 @@ const Navbar = () => {
               <BookOpen className="w-4 h-4" />
               <span>Projetos</span>
             </Link>
+            <Link
+              to="/chat-coletivo"
+              className="flex items-center space-x-1 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <MessageSquare className="w-4 h-4" />
+              <span>Chat Coletivo</span>
+            </Link>
+            {isLoggedIn && userType === "professor" && (
+              <Link
+                to="/adicionar-projeto"
+                className="flex items-center space-x-1 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Adicionar IC</span>
+              </Link>
+            )}
           </div>
 
-          {/* Desktop Login Button */}
-          <div className="hidden md:flex items-center">
-            <Link to="/login">
-              <Button variant="hero" size="default" className="flex items-center space-x-2">
-                <User className="w-4 h-4" />
-                <span>Entrar</span>
-              </Button>
-            </Link>
+          {/* Desktop Auth Buttons */}
+          <div className="hidden md:flex items-center gap-4">
+            {isLoggedIn ? (
+              <>
+                <span className="text-sm text-muted-foreground">
+                  Olá, <span className="font-medium text-foreground">{userName.split(' ')[0]}</span>
+                </span>
+                <Button 
+                  variant="outline" 
+                  size="default" 
+                  onClick={handleLogout}
+                  className="flex items-center space-x-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Sair</span>
+                </Button>
+              </>
+            ) : (
+              <Link to="/login">
+                <Button variant="hero" size="default" className="flex items-center space-x-2">
+                  <User className="w-4 h-4" />
+                  <span>Entrar</span>
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -77,13 +136,51 @@ const Navbar = () => {
               >
                 Projetos
               </Link>
-              <div className="pt-2">
-                <Link to="/login" onClick={() => setIsOpen(false)}>
-                  <Button variant="hero" size="default" className="w-full">
-                    <User className="w-4 h-4 mr-2" />
-                    Entrar
-                  </Button>
+              <Link
+                to="/chat-coletivo"
+                className="block px-3 py-2 text-muted-foreground hover:text-foreground transition-colors"
+                onClick={() => setIsOpen(false)}
+              >
+                Chat Coletivo
+              </Link>
+              {isLoggedIn && userType === "professor" && (
+                <Link
+                  to="/adicionar-projeto"
+                  className="block px-3 py-2 text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Adicionar IC
                 </Link>
+              )}
+              <div className="pt-2 space-y-2">
+                {isLoggedIn ? (
+                  <>
+                    <div className="px-3 py-2">
+                      <span className="text-sm text-muted-foreground">
+                        Olá, <span className="font-medium text-foreground">{userName.split(' ')[0]}</span>
+                      </span>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="default" 
+                      className="w-full"
+                      onClick={() => {
+                        handleLogout();
+                        setIsOpen(false);
+                      }}
+                    >
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Sair
+                    </Button>
+                  </>
+                ) : (
+                  <Link to="/login" onClick={() => setIsOpen(false)}>
+                    <Button variant="hero" size="default" className="w-full">
+                      <User className="w-4 h-4 mr-2" />
+                      Entrar
+                    </Button>
+                  </Link>
+                )}
               </div>
             </div>
           </div>

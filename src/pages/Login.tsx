@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,17 +14,22 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
+  const navigate = useNavigate();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate API call
+    // Simulate API call - Mock login as professor
     setTimeout(() => {
+      localStorage.setItem("userType", "professor");
+      localStorage.setItem("userName", "Prof. Dr. João Silva");
       toast({
         title: "Login realizado com sucesso!",
         description: "Bem-vindo ao IC Connect.",
       });
       setIsLoading(false);
+      navigate("/adicionar-projeto");
     }, 1500);
   };
 

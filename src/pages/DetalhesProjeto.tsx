@@ -13,7 +13,8 @@ import {
   CheckCircle, 
   Mail,
   Phone,
-  MapPin
+  MapPin,
+  DollarSign
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { useToast } from "@/hooks/use-toast";
@@ -37,7 +38,10 @@ const DetalhesProjeto = () => {
     duracao: "12 meses",
     inicioPrevisao: "Março 2024",
     vagasDisponiveis: 2,
-    descricaoCompleta: `Este projeto de iniciação científica visa desenvolver e implementar algoritmos avançados de aprendizado de máquina 
+    possuiBolsa: true,
+    valorBolsa: "R$ 400,00",
+    agenciaFinanciadora: "CNPq",
+    descricaoCompleta: `Este projeto de iniciação científica visa desenvolver e implementar algoritmos avançados de aprendizado de máquina
     para análise e interpretação de dados biomédicos complexos. O foco principal será na criação de modelos preditivos 
     que possam auxiliar no diagnóstico precoce de doenças e na personalização de tratamentos médicos.
 
@@ -110,6 +114,12 @@ const DetalhesProjeto = () => {
             <Badge variant="outline">
               {projeto.vagasDisponiveis} vagas disponíveis
             </Badge>
+            {projeto.possuiBolsa && (
+              <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                <DollarSign className="w-3 h-3 mr-1" />
+                Com Bolsa
+              </Badge>
+            )}
           </div>
           
           <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4 leading-tight">
@@ -207,6 +217,31 @@ const DetalhesProjeto = () => {
                 </ul>
               </CardContent>
             </Card>
+
+            {/* Bolsa Info */}
+            {projeto.possuiBolsa && (
+              <Card className="bg-gradient-card shadow-soft border-2 border-green-500/20">
+                <CardHeader>
+                  <CardTitle className="flex items-center text-green-700 dark:text-green-400">
+                    <DollarSign className="w-5 h-5 mr-2" />
+                    Informações sobre a Bolsa
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
+                    <span className="text-sm text-muted-foreground">Valor Mensal</span>
+                    <span className="text-lg font-bold text-foreground">{projeto.valorBolsa}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
+                    <span className="text-sm text-muted-foreground">Agência Financiadora</span>
+                    <span className="text-sm font-medium text-foreground">{projeto.agenciaFinanciadora}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    A bolsa é concedida mediante aprovação e disponibilidade de recursos da agência financiadora.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           {/* Sidebar */}
