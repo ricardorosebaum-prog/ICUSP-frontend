@@ -49,7 +49,7 @@ const Cadastro = () => {
     setTimeout(() => {
       toast({
         title: "Cadastro realizado com sucesso!",
-        description: "Bem-vindo ao IC Connect.",
+        description: "Bem-vindo ao ICUSP.",
       });
       setIsLoading(false);
       navigate("/projetos");
@@ -74,7 +74,7 @@ const Cadastro = () => {
       localStorage.setItem("userName", professorData.nome);
       toast({
         title: "Cadastro realizado com sucesso!",
-        description: "Bem-vindo ao IC Connect. Você pode agora adicionar seus projetos.",
+        description: "Bem-vindo ao ICUSP. Você pode agora adicionar seus projetos.",
       });
       setIsLoading(false);
       navigate("/adicionar-projeto");
@@ -102,7 +102,7 @@ const Cadastro = () => {
             <div>
               <CardTitle className="text-2xl font-bold">Criar sua conta</CardTitle>
               <CardDescription className="text-muted-foreground">
-                Escolha seu tipo de cadastro e comece a usar o IC Connect
+                Escolha seu tipo de cadastro e comece a usar o ICUSP
               </CardDescription>
             </div>
           </CardHeader>

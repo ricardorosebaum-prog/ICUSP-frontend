@@ -14,7 +14,8 @@ import {
   Mail,
   Phone,
   MapPin,
-  DollarSign
+  DollarSign,
+  Users
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { useToast } from "@/hooks/use-toast";
@@ -263,6 +264,16 @@ const DetalhesProjeto = () => {
                 >
                   Enviar Candidatura
                 </Button>
+                <Link to={`/chat-projeto/${id}`}>
+                  <Button 
+                    variant="outline" 
+                    size="lg" 
+                    className="w-full mb-4"
+                  >
+                    <Users className="w-4 h-4 mr-2" />
+                    Chat do Projeto
+                  </Button>
+                </Link>
                 <p className="text-xs text-muted-foreground text-center">
                   Sua candidatura será enviada diretamente para o orientador
                 </p>

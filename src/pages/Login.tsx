@@ -26,7 +26,7 @@ const Login = () => {
       localStorage.setItem("userName", "Prof. Dr. João Silva");
       toast({
         title: "Login realizado com sucesso!",
-        description: "Bem-vindo ao IC Connect.",
+        description: "Bem-vindo ao ICUSP.",
       });
       setIsLoading(false);
       navigate("/adicionar-projeto");

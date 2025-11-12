@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,20 +23,33 @@ interface Mensagem {
   avatar?: string;
 }
 
+// Mock de projetos
+const projetosMock: { [key: string]: { titulo: string; orientador: string } } = {
+  "1": { titulo: "Machine Learning para Biomedicina", orientador: "Prof. Dr. Ana Silva" },
+  "2": { titulo: "Sustentabilidade Industrial", orientador: "Prof. Dr. Carlos Santos" },
+  "3": { titulo: "Apps para Educação Inclusiva", orientador: "Prof. Dra. Maria Oliveira" },
+};
+
 const ChatColetivo = () => {
+  const { projetoId } = useParams<{ projetoId: string }>();
   const [mensagem, setMensagem] = useState("");
   const [mensagens, setMensagens] = useState<Mensagem[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const userName = localStorage.getItem("userName") || "Visitante";
   const userType = localStorage.getItem("userType") || "aluno";
+  
+  const projeto = projetosMock[projetoId || "1"] || { 
+    titulo: "Projeto Desconhecido", 
+    orientador: "Orientador não identificado" 
+  };
 
-  // Mock conversation data
+  // Mock conversation data específica do projeto
   const conversaInicial: Mensagem[] = [
     {
       id: "1",
-      remetente: "Prof. Dr. Carlos Santos",
+      remetente: projeto.orientador,
       tipo: "professor",
-      conteudo: "Boa tarde a todos! Lembrem-se que esta semana temos o workshop sobre metodologia científica. Não percam!",
+      conteudo: `Bem-vindos ao chat do projeto "${projeto.titulo}"! Aqui podemos discutir sobre o andamento do projeto, tirar dúvidas e compartilhar resultados.`,
       timestamp: new Date(Date.now() - 7200000),
       avatar: "/placeholder.svg"
     },
@@ -44,15 +57,15 @@ const ChatColetivo = () => {
       id: "2", 
       remetente: "Maria Oliveira",
       tipo: "aluno",
-      conteudo: "Professor, qual horário será o workshop?",
+      conteudo: "Obrigada! Estou muito empolgada para começar.",
       timestamp: new Date(Date.now() - 6900000),
       avatar: "/placeholder.svg"
     },
     {
       id: "3",
-      remetente: "Prof. Dr. Carlos Santos",
+      remetente: projeto.orientador,
       tipo: "professor", 
-      conteudo: "Será às 14h na sala 301 do prédio de Ciências. A duração estimada é de 2 horas.",
+      conteudo: "Ótimo! Vamos ter nossa primeira reunião na próxima semana para discutir os detalhes.",
       timestamp: new Date(Date.now() - 6600000),
       avatar: "/placeholder.svg"
     },
@@ -60,15 +73,15 @@ const ChatColetivo = () => {
       id: "4",
       remetente: "João Pedro Silva",
       tipo: "aluno",
-      conteudo: "Alguém sabe se vão abrir mais vagas para o projeto de IoT?",
+      conteudo: "Professor, já podemos começar a revisar a bibliografia que foi indicada?",
       timestamp: new Date(Date.now() - 5400000),
       avatar: "/placeholder.svg"
     },
     {
       id: "5",
-      remetente: "Profa. Dra. Ana Silva",
+      remetente: projeto.orientador,
       tipo: "professor",
-      conteudo: "João, estamos avaliando abrir mais 2 vagas no próximo mês. Fique atento aos anúncios!",
+      conteudo: "Sim João, podem começar! Vou disponibilizar mais alguns artigos essa semana.",
       timestamp: new Date(Date.now() - 4800000),
       avatar: "/placeholder.svg"
     },
@@ -76,31 +89,23 @@ const ChatColetivo = () => {
       id: "6",
       remetente: "Lucas Ferreira",
       tipo: "aluno",
-      conteudo: "Gostaria de compartilhar um artigo interessante sobre Deep Learning que encontrei. Posso enviar aqui?",
+      conteudo: "Alguém tem dúvidas sobre a metodologia que vamos usar?",
       timestamp: new Date(Date.now() - 3600000),
       avatar: "/placeholder.svg"
     },
     {
       id: "7",
-      remetente: "Profa. Dra. Ana Silva",
-      tipo: "professor",
-      conteudo: "Claro Lucas! Este espaço é para compartilhar conhecimento e recursos. Fique à vontade.",
-      timestamp: new Date(Date.now() - 3000000),
-      avatar: "/placeholder.svg"
-    },
-    {
-      id: "8",
       remetente: "Fernanda Costa",
       tipo: "aluno",
-      conteudo: "Pessoal, alguém tem dicas de ferramentas para análise estatística? Estou começando minha IC agora.",
+      conteudo: "Eu tenho algumas dúvidas sobre a análise de dados. Podemos discutir na próxima reunião?",
       timestamp: new Date(Date.now() - 1800000),
       avatar: "/placeholder.svg"
     },
     {
-      id: "9",
-      remetente: "Prof. Dr. Roberto Lima",
+      id: "8",
+      remetente: projeto.orientador,
       tipo: "professor",
-      conteudo: "Fernanda, recomendo começar com R ou Python (pandas/numpy). Tenho alguns tutoriais que posso compartilhar com você.",
+      conteudo: "Claro Fernanda! Vamos reservar um tempo na reunião para isso. Preparem suas questões.",
       timestamp: new Date(Date.now() - 900000),
       avatar: "/placeholder.svg"
     }
@@ -184,9 +189,9 @@ const ChatColetivo = () => {
                   <Users className="w-6 h-6 text-primary-foreground" />
                 </div>
                 <div>
-                  <CardTitle className="text-xl">Chat Coletivo - IC</CardTitle>
+                  <CardTitle className="text-xl">{projeto.titulo}</CardTitle>
                   <p className="text-sm text-muted-foreground">
-                    Comunidade de Iniciação Científica
+                    Chat do projeto - {projeto.orientador}
                   </p>
                 </div>
               </div>

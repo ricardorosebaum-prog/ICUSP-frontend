@@ -41,7 +41,7 @@ const Navbar = () => {
             <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
               <BookOpen className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold text-foreground">IC Connect</span>
+            <span className="text-xl font-bold text-foreground">ICUSP</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -59,13 +59,6 @@ const Navbar = () => {
             >
               <BookOpen className="w-4 h-4" />
               <span>Projetos</span>
-            </Link>
-            <Link
-              to="/chat-coletivo"
-              className="flex items-center space-x-1 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <MessageSquare className="w-4 h-4" />
-              <span>Chat Coletivo</span>
             </Link>
             {isLoggedIn && userType === "professor" && (
               <Link
@@ -135,13 +128,6 @@ const Navbar = () => {
                 onClick={() => setIsOpen(false)}
               >
                 Projetos
-              </Link>
-              <Link
-                to="/chat-coletivo"
-                className="block px-3 py-2 text-muted-foreground hover:text-foreground transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
-                Chat Coletivo
               </Link>
               {isLoggedIn && userType === "professor" && (
                 <Link

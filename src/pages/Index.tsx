@@ -252,7 +252,7 @@ const Index = () => {
               <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
                 <BookOpen className="w-5 h-5 text-primary-foreground" />
               </div>
-              <span className="text-xl font-bold">IC Connect</span>
+              <span className="text-xl font-bold">ICUSP</span>
             </div>
             <p className="text-background/70 mb-6">
               Conectando estudantes a oportunidades de pesquisa científica
