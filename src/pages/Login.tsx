@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye, EyeOff, Mail, Lock, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { apiPost } from "@/service/api";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -16,22 +17,38 @@ const Login = () => {
 
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setIsLoading(true);
 
-    // Simulate API call - Mock login as professor
-    setTimeout(() => {
-      localStorage.setItem("userType", "professor");
-      localStorage.setItem("userName", "Prof. Dr. João Silva");
-      toast({
-        title: "Login realizado com sucesso!",
-        description: "Bem-vindo ao ICUSP.",
-      });
-      setIsLoading(false);
-      navigate("/adicionar-projeto");
-    }, 1500);
-  };
+  try {
+    const payload = {
+      username: email,        // Django usa username, adapte se seu modelo permitir email
+      password: password,
+    };
+
+    const resposta = await apiPost("http://localhost:8000/api/login/", payload);
+
+    // exemplo: recebe dados do backend
+    toast({
+      title: "Login realizado com sucesso!",
+      description: "Bem-vindo ao ICUSP.",
+    });
+
+    navigate("/adicionar-projeto");
+  } catch (err: unknown) {
+    const errorMessage =
+      err instanceof Error ? err.message : "Erro inesperado.";
+
+    toast({
+      title: "Erro no login",
+      description: errorMessage,
+      variant: "destructive",
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4">
@@ -67,7 +84,6 @@ const Login = () => {
                   <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                   <Input
                     id="email"
-                    type="email"
                     placeholder="seu.email@exemplo.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}

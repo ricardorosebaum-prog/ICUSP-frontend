@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Eye, EyeOff, Mail, Lock, ArrowLeft, User, GraduationCap, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { apiPost } from "@/service/api";
 
 const Cadastro = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -33,28 +34,50 @@ const Cadastro = () => {
     confirmarSenha: ""
   });
 
-  const handleCadastroAluno = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (alunoData.senha !== alunoData.confirmarSenha) {
-      toast({
-        title: "Erro",
-        description: "As senhas não coincidem.",
-        variant: "destructive"
-      });
-      return;
-    }
+const handleCadastroAluno = async (e: React.FormEvent) => {
+  e.preventDefault();
 
+  if (alunoData.senha !== alunoData.confirmarSenha) {
+    toast({
+      title: "Erro",
+      description: "As senhas não coincidem.",
+      variant: "destructive",
+    });
+    return;
+  }
+
+  try {
     setIsLoading(true);
-    setTimeout(() => {
-      toast({
-        title: "Cadastro realizado com sucesso!",
-        description: "Bem-vindo ao ICUSP.",
-      });
-      setIsLoading(false);
-      navigate("/projetos");
-    }, 1500);
-  };
+
+    const payload = {
+      username: alunoData.nome,
+      email: alunoData.email,
+      matricula: alunoData.matricula,
+      curso: alunoData.curso,
+      password: alunoData.senha,
+    };
+
+    await apiPost("http://localhost:8000/api/signup/", payload);
+
+    toast({
+      title: "Cadastro realizado!",
+      description: "Bem-vindo ao ICUSP.",
+    });
+
+    navigate("/projetos");
+  } catch (err: unknown) {
+    const errorMessage =
+      err instanceof Error ? err.message : "Não foi possível realizar o cadastro.";
+
+    toast({
+      title: "Erro no cadastro",
+      description: errorMessage,
+      variant: "destructive",
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const handleCadastroProfessor = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,17 +91,37 @@ const Cadastro = () => {
       return;
     }
 
+  try {
     setIsLoading(true);
-    setTimeout(() => {
-      localStorage.setItem("userType", "professor");
-      localStorage.setItem("userName", professorData.nome);
-      toast({
-        title: "Cadastro realizado com sucesso!",
-        description: "Bem-vindo ao ICUSP. Você pode agora adicionar seus projetos.",
-      });
-      setIsLoading(false);
-      navigate("/adicionar-projeto");
-    }, 1500);
+
+    const payload = {
+      username: professorData.nome,
+      password: professorData.senha,
+    };
+
+    const resposta = await apiPost("http://localhost:8000/api/signup/", payload);
+
+    localStorage.setItem("userType", "professor");
+    localStorage.setItem("userName", resposta.nome);
+
+    toast({
+      title: "Cadastro realizado!",
+      description: "Agora você pode adicionar seus projetos.",
+    });
+
+    navigate("/adicionar-projeto");
+  } catch (err: unknown) {
+    const errorMessage =
+      err instanceof Error ? err.message : "Não foi possível realizar o cadastro.";
+
+    toast({
+      title: "Erro no cadastro",
+      description: errorMessage,
+      variant: "destructive",
+    });
+  } finally {
+    setIsLoading(false);
+  }
   };
 
   return (
