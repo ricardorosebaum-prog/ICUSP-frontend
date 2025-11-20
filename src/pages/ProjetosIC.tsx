@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,59 +6,51 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Search, Calendar, User, BookOpen, Filter } from "lucide-react";
 import Navbar from "@/components/Navbar";
+import { apiGet } from "@/service/api";
+
+interface ProjetoIC {
+  id: number;
+  titulo: string;
+  area_pesquisa: string;
+  descricao: string;
+  duracao: string;
+  status?: string;
+  tags: string;      // vem como "tag1, tag2"
+  tipo_bolsa?: string;
+  numero_vagas?: number;
+  bolsa_disponivel?: boolean;
+  objetivos?: string;
+  requisitos?: string;
+  professor?: string;
+}
 
 const ProjetosIC = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [projetos, setProjetos] = useState<ProjetoIC[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data for IC projects
-  const projetos = [
-    {
-      id: 1,
-      titulo: "Desenvolvimento de Algoritmos de Machine Learning para Análise de Dados Biomédicos",
-      orientador: "Prof. Dr. Ana Silva",
-      area: "Inteligência Artificial",
-      status: "Em andamento",
-      duracao: "12 meses",
-      descricao: "Pesquisa focada no desenvolvimento de algoritmos de aprendizado de máquina para análise e interpretação de dados biomédicos complexos.",
-      tags: ["Machine Learning", "Biomedicina", "Python", "TensorFlow"]
-    },
-    {
-      id: 2,
-      titulo: "Sustentabilidade Ambiental em Processos Industriais",
-      orientador: "Prof. Dr. Carlos Santos",
-      area: "Engenharia Ambiental",
-      status: "Concluído",
-      duracao: "18 meses",
-      descricao: "Estudo sobre implementação de práticas sustentáveis em processos industriais para redução do impacto ambiental.",
-      tags: ["Sustentabilidade", "Meio Ambiente", "Indústria", "Química Verde"]
-    },
-    {
-      id: 3,
-      titulo: "Desenvolvimento de Aplicativos Móveis para Educação Inclusiva",
-      orientador: "Prof. Dra. Maria Oliveira",
-      area: "Tecnologia Educacional",
-      status: "Em andamento",
-      duracao: "10 meses",
-      descricao: "Criação de aplicativos móveis para apoiar a educação inclusiva de crianças com necessidades especiais.",
-      tags: ["Educação", "Mobile", "Inclusão", "React Native"]
-    },
-    {
-      id: 4,
-      titulo: "Análise de Redes Sociais e Comportamento Digital",
-      orientador: "Prof. Dr. João Costa",
-      area: "Ciências Sociais",
-      status: "Recrutando",
-      duracao: "14 meses",
-      descricao: "Pesquisa sobre padrões de comportamento em redes sociais e seu impacto na sociedade contemporânea.",
-      tags: ["Redes Sociais", "Comportamento", "Análise de Dados", "Sociologia"]
+  useEffect(() => {
+    async function fetchProjetos() {
+      try {
+        const data = await apiGet("http://localhost:8000/api/iniciacao/listar/");
+        setProjetos(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     }
-  ];
 
-  const filteredProjetos = projetos.filter(projeto =>
-    projeto.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    projeto.orientador.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    projeto.area.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+    fetchProjetos();
+  }, []);
+
+  const filteredProjetos = projetos.filter((projeto) => {
+    const termo = searchTerm.toLowerCase();
+    return (
+      projeto.titulo?.toLowerCase().includes(termo) ||
+      projeto.area_pesquisa?.toLowerCase().includes(termo)
+    );
+  });
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -73,10 +65,18 @@ const ProjetosIC = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Carregando projetos...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -93,7 +93,7 @@ const ProjetosIC = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
                 type="text"
-                placeholder="Buscar por título, orientador ou área..."
+                placeholder="Buscar por título ou área..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -112,44 +112,39 @@ const ProjetosIC = () => {
             <Card key={projeto.id} className="bg-gradient-card shadow-soft hover:shadow-medium transition-all duration-300 hover:scale-105">
               <CardHeader>
                 <div className="flex justify-between items-start mb-2">
-                  <Badge className={getStatusColor(projeto.status)}>
-                    {projeto.status}
+                  <Badge className={getStatusColor(projeto.status || "Recrutando")}>
+                    {projeto.status || "Recrutando"}
                   </Badge>
-                  <Badge variant="outline">{projeto.area}</Badge>
+                  <Badge variant="outline">{projeto.area_pesquisa}</Badge>
                 </div>
+
                 <CardTitle className="text-lg leading-tight">
                   {projeto.titulo}
                 </CardTitle>
-                 <CardDescription className="flex items-center space-x-4 text-sm text-muted-foreground">
-                   <Link to="/professor/1" className="flex items-center hover:text-primary transition-colors">
-                     <User className="w-4 h-4 mr-1" />
-                     {projeto.orientador}
-                   </Link>
-                   <span className="flex items-center">
-                     <Calendar className="w-4 h-4 mr-1" />
-                     {projeto.duracao}
-                   </span>
-                 </CardDescription>
+
+                <CardDescription className="flex items-center space-x-4 text-sm text-muted-foreground">
+                  <span className="flex items-center">
+                    <Calendar className="w-4 h-4 mr-1" />
+                    {projeto.duracao}
+                  </span>
+                </CardDescription>
               </CardHeader>
-              
+
               <CardContent>
                 <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
                   {projeto.descricao}
                 </p>
-                
+
+                {/* Tags são string separada por vírgulas */}
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {projeto.tags.slice(0, 3).map((tag, index) => (
-                    <Badge key={index} variant="secondary" className="text-xs">
-                      {tag}
-                    </Badge>
-                  ))}
-                  {projeto.tags.length > 3 && (
-                    <Badge variant="secondary" className="text-xs">
-                      +{projeto.tags.length - 3}
-                    </Badge>
-                  )}
+                  {projeto.tags &&
+                    projeto.tags.split(",").slice(0, 3).map((tag: string, index: number) => (
+                      <Badge key={index} variant="secondary" className="text-xs">
+                        {tag.trim()}
+                      </Badge>
+                    ))}
                 </div>
-                
+
                 <Link to={`/projeto/${projeto.id}`}>
                   <Button variant="hero" size="sm" className="w-full">
                     <BookOpen className="w-4 h-4 mr-2" />

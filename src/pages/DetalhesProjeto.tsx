@@ -19,56 +19,33 @@ import {
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { useToast } from "@/hooks/use-toast";
+import { useEffect, useState } from "react";
+import { apiGet } from "@/service/api";
 
 const DetalhesProjeto = () => {
   const { id } = useParams();
   const { toast } = useToast();
+    const [projeto, setProjeto] = useState<ProjetoIC>();
+    const [loading, setLoading] = useState(true);
 
   // Mock data - in a real app, you'd fetch this based on the ID
-  const projeto = {
-    id: 1,
-    titulo: "Desenvolvimento de Algoritmos de Machine Learning para Análise de Dados Biomédicos",
-    orientador: {
-      nome: "Prof. Dr. Ana Silva",
-      email: "ana.silva@universidade.edu.br",
-      telefone: "(11) 9999-9999",
-      departamento: "Departamento de Ciência da Computação"
-    },
-    area: "Inteligência Artificial",
-    status: "Em andamento",
-    duracao: "12 meses",
-    inicioPrevisao: "Março 2024",
-    vagasDisponiveis: 2,
-    possuiBolsa: true,
-    valorBolsa: "R$ 400,00",
-    agenciaFinanciadora: "CNPq",
-    descricaoCompleta: `Este projeto de iniciação científica visa desenvolver e implementar algoritmos avançados de aprendizado de máquina
-    para análise e interpretação de dados biomédicos complexos. O foco principal será na criação de modelos preditivos 
-    que possam auxiliar no diagnóstico precoce de doenças e na personalização de tratamentos médicos.
 
-    O estudante terá a oportunidade de trabalhar com grandes volumes de dados médicos, aplicar técnicas de deep learning 
-    e contribuir para pesquisas que podem ter impacto real na área da saúde. Este é um projeto multidisciplinar que 
-    combina conhecimentos de computação, estatística e medicina.`,
-    objetivos: [
-      "Desenvolver algoritmos de ML para análise de dados biomédicos",
-      "Implementar modelos preditivos para diagnóstico médico",
-      "Validar a eficácia dos algoritmos desenvolvidos",
-      "Publicar resultados em congressos científicos"
-    ],
-    requisitos: [
-      "Conhecimento em programação Python",
-      "Noções básicas de estatística e matemática",
-      "Interesse em aplicações médicas da computação",
-      "Disponibilidade de 20h semanais"
-    ],
-    beneficios: [
-      "Bolsa de iniciação científica",
-      "Certificado de participação",
-      "Experiência em pesquisa científica",
-      "Possibilidade de publicação em artigos"
-    ],
-    tags: ["Machine Learning", "Biomedicina", "Python", "TensorFlow", "Deep Learning", "Saúde Digital"]
-  };
+
+  interface ProjetoIC {
+  id: number;
+  titulo: string;
+  area_pesquisa: string;
+  descricao: string;
+  duracao: string;
+  status?: string;
+  tags: string;      // vem como "tag1, tag2"
+  tipo_bolsa?: string;
+  numero_vagas?: number;
+  bolsa_disponivel?: boolean;
+  objetivos?: string;
+  requisitos?: string;
+  professor?: string;
+  }
 
   const handleCandidatar = () => {
     toast({
@@ -89,6 +66,34 @@ const DetalhesProjeto = () => {
         return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300";
     }
   };
+
+useEffect(() => {
+  async function fetchProjetos() {
+    try {
+      const data = await apiGet(`http://localhost:8000/api/iniciacao/${id}/`);
+      setProjeto(data);
+    } catch (err) {
+      console.error(err);
+      toast({
+        title: "Erro ao carregar projeto",
+        description: "Não foi possível buscar os dados do projeto.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  fetchProjetos();
+}, [id, toast]);
+
+if (loading || !projeto) {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <p>Carregando...</p>
+    </div>
+  );
+}
 
   return (
     <div className="min-h-screen bg-background">
@@ -111,11 +116,11 @@ const DetalhesProjeto = () => {
             <Badge className={getStatusColor(projeto.status)}>
               {projeto.status}
             </Badge>
-            <Badge variant="outline">{projeto.area}</Badge>
+            <Badge variant="outline">{projeto.area_pesquisa}</Badge>
             <Badge variant="outline">
-              {projeto.vagasDisponiveis} vagas disponíveis
+              {projeto.numero_vagas} vagas disponíveis
             </Badge>
-            {projeto.possuiBolsa && (
+            {projeto.bolsa_disponivel && (
               <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
                 <DollarSign className="w-3 h-3 mr-1" />
                 Com Bolsa
@@ -130,15 +135,11 @@ const DetalhesProjeto = () => {
           <div className="flex flex-wrap items-center gap-6 text-muted-foreground">
             <span className="flex items-center">
               <User className="w-4 h-4 mr-2" />
-              {projeto.orientador.nome}
+              {projeto.professor}
             </span>
             <span className="flex items-center">
               <Clock className="w-4 h-4 mr-2" />
               {projeto.duracao}
-            </span>
-            <span className="flex items-center">
-              <Calendar className="w-4 h-4 mr-2" />
-              Inicio: {projeto.inicioPrevisao}
             </span>
           </div>
         </div>
@@ -156,11 +157,7 @@ const DetalhesProjeto = () => {
               </CardHeader>
               <CardContent>
                 <div className="prose prose-sm max-w-none text-muted-foreground">
-                  {projeto.descricaoCompleta.split('\n\n').map((paragraph, index) => (
-                    <p key={index} className="mb-4">
-                      {paragraph}
-                    </p>
-                  ))}
+                  {projeto.descricao}
                 </div>
               </CardContent>
             </Card>
@@ -174,14 +171,9 @@ const DetalhesProjeto = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ul className="space-y-3">
-                  {projeto.objetivos.map((objetivo, index) => (
-                    <li key={index} className="flex items-start">
-                      <CheckCircle className="w-5 h-5 text-primary mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-muted-foreground">{objetivo}</span>
-                    </li>
-                  ))}
-                </ul>
+                <div className="prose prose-sm max-w-none text-muted-foreground">
+                  {projeto.objetivos}
+                </div>
               </CardContent>
             </Card>
 
@@ -191,36 +183,14 @@ const DetalhesProjeto = () => {
                 <CardTitle>Requisitos</CardTitle>
               </CardHeader>
               <CardContent>
-                <ul className="space-y-3">
-                  {projeto.requisitos.map((requisito, index) => (
-                    <li key={index} className="flex items-start">
-                      <div className="w-2 h-2 bg-primary rounded-full mr-3 mt-2.5 flex-shrink-0" />
-                      <span className="text-muted-foreground">{requisito}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-
-            {/* Benefits */}
-            <Card className="bg-gradient-card shadow-soft">
-              <CardHeader>
-                <CardTitle>Benefícios</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3">
-                  {projeto.beneficios.map((beneficio, index) => (
-                    <li key={index} className="flex items-start">
-                      <CheckCircle className="w-5 h-5 text-accent mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-muted-foreground">{beneficio}</span>
-                    </li>
-                  ))}
-                </ul>
+                <div className="prose prose-sm max-w-none text-muted-foreground">
+                  {projeto.requisitos}
+                </div>
               </CardContent>
             </Card>
 
             {/* Bolsa Info */}
-            {projeto.possuiBolsa && (
+            {projeto.bolsa_disponivel && (
               <Card className="bg-gradient-card shadow-soft border-2 border-green-500/20">
                 <CardHeader>
                   <CardTitle className="flex items-center text-green-700 dark:text-green-400">
@@ -231,11 +201,11 @@ const DetalhesProjeto = () => {
                 <CardContent className="space-y-3">
                   <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
                     <span className="text-sm text-muted-foreground">Valor Mensal</span>
-                    <span className="text-lg font-bold text-foreground">{projeto.valorBolsa}</span>
+                    <span className="text-lg font-bold text-foreground">{projeto.tipo_bolsa}</span>
                   </div>
                   <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
                     <span className="text-sm text-muted-foreground">Agência Financiadora</span>
-                    <span className="text-sm font-medium text-foreground">{projeto.agenciaFinanciadora}</span>
+                    <span className="text-sm font-medium text-foreground">{projeto.tipo_bolsa}</span>
                   </div>
                   <p className="text-xs text-muted-foreground mt-2">
                     A bolsa é concedida mediante aprovação e disponibilidade de recursos da agência financiadora.
@@ -287,8 +257,7 @@ const DetalhesProjeto = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <h4 className="font-semibold text-foreground mb-2">{projeto.orientador.nome}</h4>
-                  <p className="text-sm text-muted-foreground mb-3">{projeto.orientador.departamento}</p>
+                  <h4 className="font-semibold text-foreground mb-2">{projeto.professor}</h4>
                 </div>
                 
                 <Separator />
@@ -296,11 +265,11 @@ const DetalhesProjeto = () => {
                  <div className="space-y-3">
                    <div className="flex items-center">
                      <Mail className="w-4 h-4 mr-3 text-muted-foreground" />
-                     <span className="text-sm text-muted-foreground">{projeto.orientador.email}</span>
+                     <span className="text-sm text-muted-foreground">{projeto.professor}</span>
                    </div>
                    <div className="flex items-center">
                      <Phone className="w-4 h-4 mr-3 text-muted-foreground" />
-                     <span className="text-sm text-muted-foreground">{projeto.orientador.telefone}</span>
+                     <span className="text-sm text-muted-foreground">{projeto.professor}</span>
                    </div>
                  </div>
                  
@@ -321,11 +290,7 @@ const DetalhesProjeto = () => {
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  {projeto.tags.map((tag, index) => (
-                    <Badge key={index} variant="secondary" className="text-xs">
-                      {tag}
-                    </Badge>
-                  ))}
+                  {projeto.tags}
                 </div>
               </CardContent>
             </Card>

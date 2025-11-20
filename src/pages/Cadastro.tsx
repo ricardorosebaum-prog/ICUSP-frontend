@@ -52,12 +52,20 @@ const handleCadastroAluno = async (e: React.FormEvent) => {
     const payload = {
       username: alunoData.nome,
       email: alunoData.email,
+      password: alunoData.senha,
+      password2: alunoData.confirmarSenha,
       matricula: alunoData.matricula,
       curso: alunoData.curso,
-      password: alunoData.senha,
     };
 
-    await apiPost("http://localhost:8000/api/signup/", payload);
+    const resposta = await apiPost(
+      "http://localhost:8000/api/signup/aluno/",
+      payload
+    );
+
+    localStorage.setItem("userType", "aluno");
+    localStorage.setItem("userName", resposta.user.username);
+    localStorage.setItem("accessToken", resposta.access_token);
 
     toast({
       title: "Cadastro realizado!",
@@ -79,30 +87,38 @@ const handleCadastroAluno = async (e: React.FormEvent) => {
   }
 };
 
-  const handleCadastroProfessor = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (professorData.senha !== professorData.confirmarSenha) {
-      toast({
-        title: "Erro",
-        description: "As senhas não coincidem.",
-        variant: "destructive"
-      });
-      return;
-    }
+const handleCadastroProfessor = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  if (professorData.senha !== professorData.confirmarSenha) {
+    toast({
+      title: "Erro",
+      description: "As senhas não coincidem.",
+      variant: "destructive"
+    });
+    return;
+  }
 
   try {
     setIsLoading(true);
 
     const payload = {
       username: professorData.nome,
+      email: professorData.email,
+      departamento: professorData.departamento,
+      areas_pesquisa: professorData.areasPesquisa,
       password: professorData.senha,
+      password2: alunoData.confirmarSenha,
     };
 
-    const resposta = await apiPost("http://localhost:8000/api/signup/", payload);
+    const resposta = await apiPost(
+      "http://localhost:8000/api/signup/professor/",
+      payload
+    );
 
     localStorage.setItem("userType", "professor");
-    localStorage.setItem("userName", resposta.nome);
+    localStorage.setItem("userName", resposta.user.username);
+    localStorage.setItem("accessToken", resposta.access_token);
 
     toast({
       title: "Cadastro realizado!",
@@ -119,10 +135,12 @@ const handleCadastroAluno = async (e: React.FormEvent) => {
       description: errorMessage,
       variant: "destructive",
     });
+
   } finally {
     setIsLoading(false);
   }
-  };
+};
+
 
   return (
     <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4">

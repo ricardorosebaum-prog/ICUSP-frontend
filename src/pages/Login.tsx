@@ -28,6 +28,9 @@ const handleSubmit = async (e: React.FormEvent) => {
     };
 
     const resposta = await apiPost("http://localhost:8000/api/login/", payload);
+    localStorage.setItem("userType", resposta.user.user_type);
+    localStorage.setItem("userName", resposta.user.username);
+    localStorage.setItem("accessToken", resposta.access_token);
 
     // exemplo: recebe dados do backend
     toast({
