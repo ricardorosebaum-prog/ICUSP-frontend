@@ -105,10 +105,10 @@ const handleCadastroProfessor = async (e: React.FormEvent) => {
     const payload = {
       username: professorData.nome,
       email: professorData.email,
+      password: professorData.senha,
+      password2: professorData.confirmarSenha,
       departamento: professorData.departamento,
       areas_pesquisa: professorData.areasPesquisa,
-      password: professorData.senha,
-      password2: alunoData.confirmarSenha,
     };
 
     const resposta = await apiPost(
