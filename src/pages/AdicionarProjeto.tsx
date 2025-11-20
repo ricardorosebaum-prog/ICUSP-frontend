@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +29,18 @@ const AdicionarProjeto = () => {
     agenciaFinanciadora: "",
     tags: ""
   });
+
+useEffect(() => {
+  const userType = localStorage.getItem("userType");
+  if (userType !== "professor") {
+    toast({
+      title: "Acesso negado",
+      description: "Esta página é apenas acessível para professores.",
+      variant: "destructive",
+    });
+    navigate("/"); // redireciona para página inicial
+  }
+}, [navigate, toast]);
 
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();

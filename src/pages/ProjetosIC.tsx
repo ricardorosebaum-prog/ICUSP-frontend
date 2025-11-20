@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate  } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +28,8 @@ const ProjetosIC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [projetos, setProjetos] = useState<ProjetoIC[]>([]);
   const [loading, setLoading] = useState(true);
+  const userType = localStorage.getItem("userType"); //tipo do usuário
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchProjetos() {
@@ -86,6 +88,16 @@ const ProjetosIC = () => {
           <p className="text-xl text-muted-foreground mb-6">
             Explore oportunidades de pesquisa e participe de projetos inovadores
           </p>
+
+            {/* BOTÃO SOMENTE PARA PROFESSOR */}
+            {userType === "professor" && (
+              <Button
+                onClick={() => navigate("/adicionar-projeto")}
+                className="mb-6 bg-blue-600 text-white hover:bg-blue-700"
+              >
+                + Adicionar Projeto
+              </Button>
+            )}
 
           {/* Search Bar */}
           <div className="flex flex-col sm:flex-row gap-4 mb-6">

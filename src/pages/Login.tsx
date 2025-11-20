@@ -10,7 +10,7 @@ import { apiPost } from "@/service/api";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
+  const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -23,12 +23,12 @@ const handleSubmit = async (e: React.FormEvent) => {
 
   try {
     const payload = {
-      username: email,        // Django usa username, adapte se seu modelo permitir email
+      username: login,        // Django usa username, adapte se seu modelo permitir email
       password: password,
     };
 
     const resposta = await apiPost("http://localhost:8000/api/login/", payload);
-    localStorage.setItem("userType", resposta.user.user_type);
+    localStorage.setItem("userType", resposta.user.role);
     localStorage.setItem("userName", resposta.user.username);
     localStorage.setItem("accessToken", resposta.access_token);
 
@@ -38,7 +38,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       description: "Bem-vindo ao ICUSP.",
     });
 
-    navigate("/adicionar-projeto");
+    navigate("/projetos");
   } catch (err: unknown) {
     const errorMessage =
       err instanceof Error ? err.message : "Erro inesperado.";
@@ -82,14 +82,14 @@ const handleSubmit = async (e: React.FormEvent) => {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="login">Usuário ou email</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                   <Input
-                    id="email"
-                    placeholder="seu.email@exemplo.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    id="login"
+                    placeholder="seu.email@usp.br"
+                    value={login}
+                    onChange={(e) => setLogin(e.target.value)}
                     className="pl-10"
                     required
                   />

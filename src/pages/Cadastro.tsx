@@ -125,7 +125,7 @@ const handleCadastroProfessor = async (e: React.FormEvent) => {
       description: "Agora você pode adicionar seus projetos.",
     });
 
-    navigate("/adicionar-projeto");
+    navigate("/projetos");
   } catch (err: unknown) {
     const errorMessage =
       err instanceof Error ? err.message : "Não foi possível realizar o cadastro.";
