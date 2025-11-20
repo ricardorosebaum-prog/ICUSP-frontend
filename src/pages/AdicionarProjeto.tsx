@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { ArrowLeft, Plus, Save } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { useToast } from "@/hooks/use-toast";
+import { apiPostToken } from "@/service/api";
 
 const AdicionarProjeto = () => {
   const { toast } = useToast();
@@ -29,20 +30,44 @@ const AdicionarProjeto = () => {
     tags: ""
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setIsLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      toast({
-        title: "Projeto criado com sucesso!",
-        description: "Seu projeto de IC foi publicado e está disponível para candidaturas.",
-      });
-      setIsLoading(false);
-      navigate("/projetos");
-    }, 1500);
-  };
+  try {
+    const payload = {
+      titulo: projeto.titulo,
+      area_pesquisa: projeto.area,
+      duracao: projeto.duracao,
+      numero_vagas: projeto.vagas,
+      descricao: projeto.descricao,
+      bolsa_disponivel: projeto.possuiBolsa,
+      tipo_bolsa: projeto.possuiBolsa
+        ? projeto.agenciaFinanciadora
+        : "",
+      tags: projeto.tags,
+    };
+
+    await apiPostToken("http://localhost:8000/api/iniciacao/criar/", payload);
+
+    toast({
+      title: "Projeto criado com sucesso!",
+      description: "Seu projeto foi publicado e está disponível.",
+    });
+
+    navigate("/projetos");
+  } catch (err: unknown) {
+        const errorMessage =
+      err instanceof Error ? err.message : "Erro inesperado.";
+    toast({
+      title: "Erro ao criar projeto",
+      description: errorMessage,
+      variant: "destructive",
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-background">

@@ -1,15 +1,49 @@
-interface apiPost {
-    username: string;
-    password: string;
-}
-
-export async function apiPost(url: string, data: apiPost) {
+export async function apiPost(url: string, data: unknown) {
   const res = await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(data),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || "Erro na requisição");
+  }
+
+  return res.json();
+}
+
+export async function apiPostToken(url: string, data: unknown) {
+  const token = localStorage.getItem("accessToken");
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token && { Authorization: `Bearer ${token}` }),
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || "Erro na requisição");
+  }
+
+  return res.json();
+}
+
+export async function apiGet(url: string) {
+  const token = localStorage.getItem("accessToken");
+
+  const res = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token && { Authorization: `Bearer ${token}` }),
+    },
   });
 
   if (!res.ok) {
