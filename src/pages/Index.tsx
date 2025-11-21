@@ -77,7 +77,7 @@ const Index = () => {
                 </Button>
               </Link>
               <Link to="/login">
-                <Button variant="outline" size="xl" className="text-primary-foreground border-primary-foreground/30 hover:bg-primary-foreground hover:text-primary">
+                <Button variant="hero" size="xl" className="text-primary-foreground border-primary-foreground/30 hover:bg-primary-foreground hover:text-primary">
                   Fazer Login
                 </Button>
               </Link>
