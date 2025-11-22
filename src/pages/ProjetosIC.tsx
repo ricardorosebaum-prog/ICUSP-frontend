@@ -1,10 +1,22 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate  } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Search, Calendar, User, BookOpen, Filter } from "lucide-react";
+import {
+  Search,
+  Calendar,
+  BookOpen,
+  Filter,
+} from "lucide-react";
+
 import Navbar from "@/components/Navbar";
 import { apiGet } from "@/service/api";
 
@@ -15,12 +27,10 @@ interface ProjetoIC {
   descricao: string;
   duracao: string;
   status?: string;
-  tags: string;      // vem como "tag1, tag2"
+  tags: string;
   tipo_bolsa?: string;
   numero_vagas?: number;
   bolsa_disponivel?: boolean;
-  objetivos?: string;
-  requisitos?: string;
   professor?: string;
 }
 
@@ -28,7 +38,7 @@ const ProjetosIC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [projetos, setProjetos] = useState<ProjetoIC[]>([]);
   const [loading, setLoading] = useState(true);
-  const userType = localStorage.getItem("userType"); //tipo do usuário
+  const userType = localStorage.getItem("userType");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -42,7 +52,6 @@ const ProjetosIC = () => {
         setLoading(false);
       }
     }
-
     fetchProjetos();
   }, []);
 
@@ -57,108 +66,119 @@ const ProjetosIC = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Em andamento":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300";
+        return "bg-blue-500/20 text-blue-300";
       case "Concluído":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
+        return "bg-green-500/20 text-green-300";
       case "Recrutando":
-        return "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300";
+        return "bg-yellow-500/20 text-yellow-300";
       default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300";
+        return "bg-white/10 text-white/70";
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-[#0f172a] text-white flex items-center justify-center">
         <p>Carregando projetos...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#0f172a] text-white relative overflow-hidden">
+      {/* MESMO FUNDO DO INDEX */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#6a5cff] via-[#3f4aff] to-[#2fb6ff] opacity-20" />
+
       <Navbar />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-foreground mb-4">
-            Projetos de Iniciação Científica
-          </h1>
-          <p className="text-xl text-muted-foreground mb-6">
-            Explore oportunidades de pesquisa e participe de projetos inovadores
-          </p>
+      <div className="relative max-w-7xl mx-auto px-6 py-16">
+        <h1 className="text-5xl font-extrabold mb-6 drop-shadow-xl">
+          Projetos de Iniciação Científica
+        </h1>
+        <p className="text-xl text-white/80 mb-10">
+          Explore oportunidades de pesquisa e participe de projetos inovadores
+        </p>
 
-            {/* BOTÃO SOMENTE PARA PROFESSOR */}
-            {userType === "professor" && (
-              <Button
-                onClick={() => navigate("/adicionar-projeto")}
-                className="mb-6 bg-blue-600 text-white hover:bg-blue-700"
-              >
-                + Adicionar Projeto
-              </Button>
-            )}
+        {/* Botão Professor */}
+        {userType === "professor" && (
+          <Button
+            onClick={() => navigate("/adicionar-projeto")}
+            className="mb-8 bg-gradient-to-r from-[#6a5cff] to-[#2fb6ff] hover:opacity-90 shadow-xl"
+          >
+            + Adicionar Projeto
+          </Button>
+        )}
 
-          {/* Search Bar */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                type="text"
-                placeholder="Buscar por título ou área..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Button variant="outline" className="flex items-center space-x-2">
-              <Filter className="w-4 h-4" />
-              <span>Filtros</span>
-            </Button>
+        {/* Barra de busca */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-10">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60 w-4 h-4" />
+            <Input
+              type="text"
+              placeholder="Buscar por título ou área..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 bg-white/10 border-white/20 text-white placeholder-white/60"
+            />
           </div>
+
+          <Button
+            className="border border-white/30 bg-white/5 text-white hover:bg-white/15 backdrop-blur-xl transition-all"
+          >
+            <Filter className="w-4 h-4 mr-2" />
+            Filtros
+          </Button>
         </div>
 
-        {/* Projects Grid */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {/* Cards */}
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {filteredProjetos.map((projeto) => (
-            <Card key={projeto.id} className="bg-gradient-card shadow-soft hover:shadow-medium transition-all duration-300 hover:scale-105">
+            <Card
+              key={projeto.id}
+              className="bg-white/5 border-white/10 backdrop-blur-xl p-4 rounded-2xl shadow-xl hover:bg-white/10 transition-all"
+            >
               <CardHeader>
-                <div className="flex justify-between items-start mb-2">
-                  <Badge className={getStatusColor(projeto.status || "Recrutando")}>
+                <div className="flex justify-between items-start mb-3">
+                  <Badge className={`${getStatusColor(projeto.status || "Recrutando")} px-3 py-1 rounded-full text-sm`}>
                     {projeto.status || "Recrutando"}
                   </Badge>
-                  <Badge variant="outline">{projeto.area_pesquisa}</Badge>
+
+                  <Badge className="bg-white/10 border-white/20 text-white/80 px-3 py-1 rounded-full text-sm">
+                    {projeto.area_pesquisa}
+                  </Badge>
                 </div>
 
-                <CardTitle className="text-lg leading-tight">
+                <CardTitle className="text-xl text-white leading-tight">
                   {projeto.titulo}
                 </CardTitle>
 
-                <CardDescription className="flex items-center space-x-4 text-sm text-muted-foreground">
-                  <span className="flex items-center">
-                    <Calendar className="w-4 h-4 mr-1" />
-                    {projeto.duracao}
-                  </span>
+                <CardDescription className="text-white/60 flex items-center mt-2">
+                  <Calendar className="w-4 h-4 mr-2" />
+                  {projeto.duracao}
                 </CardDescription>
               </CardHeader>
 
               <CardContent>
-                <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
+                <p className="text-white/70 mb-4 line-clamp-3">
                   {projeto.descricao}
                 </p>
 
-                {/* Tags são string separada por vírgulas */}
                 <div className="flex flex-wrap gap-2 mb-4">
                   {projeto.tags &&
-                    projeto.tags.split(",").slice(0, 3).map((tag: string, index: number) => (
-                      <Badge key={index} variant="secondary" className="text-xs">
+                    projeto.tags.split(",").slice(0, 3).map((tag, i) => (
+                      <Badge
+                        key={i}
+                        className="bg-white/10 border-white/20 text-white/70 text-xs px-2 py-1 rounded-full"
+                      >
                         {tag.trim()}
                       </Badge>
                     ))}
                 </div>
 
                 <Link to={`/projeto/${projeto.id}`}>
-                  <Button variant="hero" size="sm" className="w-full">
+                  <Button
+                    className="w-full bg-gradient-to-r from-[#6a5cff] to-[#2fb6ff] hover:opacity-90 shadow-xl"
+                  >
                     <BookOpen className="w-4 h-4 mr-2" />
                     Ver Detalhes
                   </Button>
@@ -169,14 +189,12 @@ const ProjetosIC = () => {
         </div>
 
         {filteredProjetos.length === 0 && (
-          <div className="text-center py-12">
-            <BookOpen className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-xl font-semibold text-foreground mb-2">
+          <div className="text-center py-20">
+            <BookOpen className="w-16 h-16 mx-auto text-white/40 mb-4" />
+            <h3 className="text-2xl font-semibold text-white mb-2">
               Nenhum projeto encontrado
             </h3>
-            <p className="text-muted-foreground">
-              Tente ajustar seus termos de busca ou filtros
-            </p>
+            <p className="text-white/60">Tente ajustar os termos da busca</p>
           </div>
         )}
       </div>

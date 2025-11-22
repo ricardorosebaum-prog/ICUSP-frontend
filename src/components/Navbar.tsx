@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, User, BookOpen, Home, MessageSquare, Plus, LogOut } from "lucide-react";
+import { Menu, X, User, BookOpen, Home, Plus, LogOut } from "lucide-react";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,7 +17,7 @@ const Navbar = () => {
       setUserType(type || "");
       setUserName(name || "");
     };
-    
+
     checkAuth();
     window.addEventListener("storage", checkAuth);
     return () => window.removeEventListener("storage", checkAuth);
@@ -33,37 +33,41 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-background/95 backdrop-blur-sm border-b border-border sticky top-0 z-50">
+    <nav className="bg-gradient-hero/80 backdrop-blur-md shadow-lg border-b border-white/10 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-              <BookOpen className="w-5 h-5 text-primary-foreground" />
+
+          {/* LOGO */}
+          <Link to="/" className="flex items-center space-x-2 group">
+            <div className="w-9 h-9 bg-gradient-primary rounded-xl flex items-center justify-center shadow-md transition-all group-hover:scale-105">
+              <BookOpen className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-foreground">ICUSP</span>
+            <span className="text-xl font-bold text-white tracking-wide drop-shadow-sm">
+              ICUSP
+            </span>
           </Link>
 
-          {/* Desktop Navigation */}
+          {/* DESKTOP NAV */}
           <div className="hidden md:flex items-center space-x-8">
             <Link
               to="/"
-              className="flex items-center space-x-1 text-muted-foreground hover:text-foreground transition-colors"
+              className="flex items-center space-x-1 text-white/80 hover:text-white transition"
             >
               <Home className="w-4 h-4" />
               <span>Início</span>
             </Link>
             <Link
               to="/projetos"
-              className="flex items-center space-x-1 text-muted-foreground hover:text-foreground transition-colors"
+              className="flex items-center space-x-1 text-white/80 hover:text-white transition"
             >
               <BookOpen className="w-4 h-4" />
               <span>Projetos</span>
             </Link>
+
             {isLoggedIn && userType === "professor" && (
               <Link
                 to="/adicionar-projeto"
-                className="flex items-center space-x-1 text-muted-foreground hover:text-foreground transition-colors"
+                className="flex items-center space-x-1 text-white/80 hover:text-white transition"
               >
                 <Plus className="w-4 h-4" />
                 <span>Adicionar IC</span>
@@ -71,103 +75,106 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* Desktop Auth Buttons */}
+          {/* DESKTOP AUTH */}
           <div className="hidden md:flex items-center gap-4">
             {isLoggedIn ? (
               <>
-                <span className="text-sm text-muted-foreground">
-                  Olá, <span className="font-medium text-foreground">{userName.split(' ')[0]}</span>
+                <span className="text-sm text-white/80">
+                  Olá,{" "}
+                  <span className="font-semibold text-white">
+                    {userName.split(" ")[0]}
+                  </span>
                 </span>
-                <Button 
-                  variant="outline" 
-                  size="default" 
-                  onClick={handleLogout}
-                  className="flex items-center space-x-2"
+
+                <Button
+                variant="hero"
+                size="default"
+                onClick={handleLogout}
+                className="shadow-md"
                 >
-                  <LogOut className="w-4 h-4" />
-                  <span>Sair</span>
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sair
                 </Button>
               </>
             ) : (
               <Link to="/login">
-                <Button variant="hero" size="default" className="flex items-center space-x-2">
-                  <User className="w-4 h-4" />
-                  <span>Entrar</span>
+                <Button variant="hero" size="default" className="shadow-md">
+                  <User className="w-4 h-4 mr-2" />
+                  Entrar
                 </Button>
               </Link>
             )}
           </div>
 
-          {/* Mobile menu button */}
+          {/* MOBILE MENU TOGGLE */}
           <div className="md:hidden">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setIsOpen(!isOpen)}
-              aria-label="Toggle menu"
+              className="text-white"
             >
-              {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </Button>
           </div>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* MOBILE NAV */}
         {isOpen && (
-          <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 bg-background border-t border-border">
+          <div className="md:hidden bg-gradient-hero/90 backdrop-blur-xl border-t border-white/10 shadow-lg rounded-b-xl py-4">
+            <Link
+              to="/"
+              onClick={() => setIsOpen(false)}
+              className="block px-4 py-2 text-white/80 hover:text-white transition"
+            >
+              Início
+            </Link>
+
+            <Link
+              to="/projetos"
+              onClick={() => setIsOpen(false)}
+              className="block px-4 py-2 text-white/80 hover:text-white transition"
+            >
+              Projetos
+            </Link>
+
+            {isLoggedIn && userType === "professor" && (
               <Link
-                to="/"
-                className="block px-3 py-2 text-muted-foreground hover:text-foreground transition-colors"
+                to="/adicionar-projeto"
                 onClick={() => setIsOpen(false)}
+                className="block px-4 py-2 text-white/80 hover:text-white transition"
               >
-                Início
+                Adicionar IC
               </Link>
-              <Link
-                to="/projetos"
-                className="block px-3 py-2 text-muted-foreground hover:text-foreground transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
-                Projetos
-              </Link>
-              {isLoggedIn && userType === "professor" && (
-                <Link
-                  to="/adicionar-projeto"
-                  className="block px-3 py-2 text-muted-foreground hover:text-foreground transition-colors"
-                  onClick={() => setIsOpen(false)}
-                >
-                  Adicionar IC
+            )}
+
+            <div className="mt-4 px-4">
+              {isLoggedIn ? (
+                <>
+                  <p className="text-white/80 mb-2">
+                    Olá,{" "}
+                    <span className="text-white font-semibold">
+                      {userName.split(" ")[0]}
+                    </span>
+                  </p>
+
+                  <Button
+                    onClick={handleLogout}
+                    className="w-full border-white/40 text-white hover:bg-white/10"
+                    variant="outline"
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sair
+                  </Button>
+                </>
+              ) : (
+                <Link to="/login" onClick={() => setIsOpen(false)}>
+                  <Button className="w-full" variant="hero">
+                    <User className="w-4 h-4 mr-2" />
+                    Entrar
+                  </Button>
                 </Link>
               )}
-              <div className="pt-2 space-y-2">
-                {isLoggedIn ? (
-                  <>
-                    <div className="px-3 py-2">
-                      <span className="text-sm text-muted-foreground">
-                        Olá, <span className="font-medium text-foreground">{userName.split(' ')[0]}</span>
-                      </span>
-                    </div>
-                    <Button 
-                      variant="outline" 
-                      size="default" 
-                      className="w-full"
-                      onClick={() => {
-                        handleLogout();
-                        setIsOpen(false);
-                      }}
-                    >
-                      <LogOut className="w-4 h-4 mr-2" />
-                      Sair
-                    </Button>
-                  </>
-                ) : (
-                  <Link to="/login" onClick={() => setIsOpen(false)}>
-                    <Button variant="hero" size="default" className="w-full">
-                      <User className="w-4 h-4 mr-2" />
-                      Entrar
-                    </Button>
-                  </Link>
-                )}
-              </div>
             </div>
           </div>
         )}

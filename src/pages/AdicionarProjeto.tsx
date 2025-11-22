@@ -30,82 +30,88 @@ const AdicionarProjeto = () => {
     tags: ""
   });
 
-useEffect(() => {
-  const userType = localStorage.getItem("userType");
-  if (userType !== "professor") {
-    toast({
-      title: "Acesso negado",
-      description: "Esta página é apenas acessível para professores.",
-      variant: "destructive",
-    });
-    navigate("/"); // redireciona para página inicial
-  }
-}, [navigate, toast]);
+  useEffect(() => {
+    const userType = localStorage.getItem("userType");
+    if (userType !== "professor") {
+      toast({
+        title: "Acesso negado",
+        description: "Esta página é apenas acessível para professores.",
+        variant: "destructive",
+      });
+      navigate("/");
+    }
+  }, [navigate, toast]);
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setIsLoading(true);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
 
-  try {
-    const payload = {
-      titulo: projeto.titulo,
-      area_pesquisa: projeto.area,
-      duracao: projeto.duracao,
-      numero_vagas: projeto.vagas,
-      descricao: projeto.descricao,
-      bolsa_disponivel: projeto.possuiBolsa,
-      tipo_bolsa: projeto.possuiBolsa
-        ? projeto.agenciaFinanciadora
-        : "",
-      tags: projeto.tags,
-    };
+    try {
+      const payload = {
+        titulo: projeto.titulo,
+        area_pesquisa: projeto.area,
+        duracao: projeto.duracao,
+        numero_vagas: projeto.vagas,
+        descricao: projeto.descricao,
+        bolsa_disponivel: projeto.possuiBolsa,
+        tipo_bolsa: projeto.possuiBolsa ? projeto.agenciaFinanciadora : "",
+        tags: projeto.tags,
+      };
 
-    await apiPostToken("http://localhost:8000/api/iniciacao/criar/", payload);
+      await apiPostToken("http://localhost:8000/api/iniciacao/criar/", payload);
 
-    toast({
-      title: "Projeto criado com sucesso!",
-      description: "Seu projeto foi publicado e está disponível.",
-    });
+      toast({
+        title: "Projeto criado com sucesso!",
+        description: "Seu projeto foi publicado e está disponível.",
+      });
 
-    navigate("/projetos");
-  } catch (err: unknown) {
-        const errorMessage =
-      err instanceof Error ? err.message : "Erro inesperado.";
-    toast({
-      title: "Erro ao criar projeto",
-      description: errorMessage,
-      variant: "destructive",
-    });
-  } finally {
-    setIsLoading(false);
-  }
-};
+      navigate("/projetos");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Erro inesperado.";
+      toast({
+        title: "Erro ao criar projeto",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-[#0a041f] via-[#120a2b] to-[#1b0f3a] text-white">
       <Navbar />
-      
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Back Button */}
-        <div className="mb-6">
+
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+        {/* BACK BUTTON */}
+        <div className="mb-8">
           <Link to="/projetos">
-            <Button variant="ghost" className="flex items-center space-x-2">
-              <ArrowLeft className="w-4 h-4" />
-              <span>Voltar aos projetos</span>
+            <Button
+              variant="ghost"
+              className="text-white hover:bg-white/10 hover:text-white border border-white/10 px-4 py-2 rounded-xl backdrop-blur-md"
+            >
+              <ArrowLeft className="w-5 h-5 mr-2" />
+              Voltar aos projetos
             </Button>
           </Link>
         </div>
 
-        <Card className="bg-gradient-card shadow-medium">
+        {/* MAIN CARD */}
+        <Card className="bg-white/10 backdrop-blur-xl border-white/10 shadow-xl rounded-2xl">
           <CardHeader>
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-primary rounded-lg flex items-center justify-center">
-                <Plus className="w-6 h-6 text-primary-foreground" />
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-lg">
+                <Plus className="w-6 h-6 text-white" />
               </div>
+
               <div>
-                <CardTitle className="text-2xl">Adicionar Novo Projeto de IC</CardTitle>
-                <CardDescription>
-                  Preencha as informações do seu projeto de iniciação científica
+                <CardTitle className="text-3xl font-bold text-white">
+                  Adicionar Projeto de IC
+                </CardTitle>
+
+                <CardDescription className="text-white/70 text-base">
+                  Preencha as informações do seu novo projeto
                 </CardDescription>
               </div>
             </div>
@@ -113,11 +119,13 @@ const handleSubmit = async (e: React.FormEvent) => {
 
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
+
               {/* Título */}
               <div className="space-y-2">
-                <Label htmlFor="titulo">Título do Projeto *</Label>
+                <Label htmlFor="titulo" className="text-white">Título do Projeto *</Label>
                 <Input
                   id="titulo"
+                  className="bg-white/5 border-white/20 text-white placeholder-white/40 backdrop-blur-md"
                   placeholder="Ex: Desenvolvimento de Algoritmos de Machine Learning..."
                   value={projeto.titulo}
                   onChange={(e) => setProjeto({ ...projeto, titulo: e.target.value })}
@@ -125,12 +133,12 @@ const handleSubmit = async (e: React.FormEvent) => {
                 />
               </div>
 
-              {/* Área e Duração */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Área & Duração */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="area">Área de Pesquisa *</Label>
+                  <Label className="text-white">Área de Pesquisa *</Label>
                   <Input
-                    id="area"
+                    className="bg-white/5 border-white/20 text-white placeholder-white/40 backdrop-blur-md"
                     placeholder="Ex: Inteligência Artificial"
                     value={projeto.area}
                     onChange={(e) => setProjeto({ ...projeto, area: e.target.value })}
@@ -139,9 +147,9 @@ const handleSubmit = async (e: React.FormEvent) => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="duracao">Duração *</Label>
+                  <Label className="text-white">Duração *</Label>
                   <Input
-                    id="duracao"
+                    className="bg-white/5 border-white/20 text-white placeholder-white/40 backdrop-blur-md"
                     placeholder="Ex: 12 meses"
                     value={projeto.duracao}
                     onChange={(e) => setProjeto({ ...projeto, duracao: e.target.value })}
@@ -152,10 +160,9 @@ const handleSubmit = async (e: React.FormEvent) => {
 
               {/* Descrição */}
               <div className="space-y-2">
-                <Label htmlFor="descricao">Descrição do Projeto *</Label>
+                <Label className="text-white">Descrição *</Label>
                 <Textarea
-                  id="descricao"
-                  placeholder="Descreva o projeto, seus objetivos principais e a metodologia a ser utilizada..."
+                  className="bg-white/5 border-white/20 text-white placeholder-white/40 backdrop-blur-md"
                   value={projeto.descricao}
                   onChange={(e) => setProjeto({ ...projeto, descricao: e.target.value })}
                   rows={6}
@@ -165,10 +172,9 @@ const handleSubmit = async (e: React.FormEvent) => {
 
               {/* Objetivos */}
               <div className="space-y-2">
-                <Label htmlFor="objetivos">Objetivos (um por linha)</Label>
+                <Label className="text-white">Objetivos</Label>
                 <Textarea
-                  id="objetivos"
-                  placeholder="Desenvolver algoritmos de ML&#10;Implementar modelos preditivos&#10;Validar a eficácia dos algoritmos"
+                  className="bg-white/5 border-white/20 text-white placeholder-white/40 backdrop-blur-md"
                   value={projeto.objetivos}
                   onChange={(e) => setProjeto({ ...projeto, objetivos: e.target.value })}
                   rows={4}
@@ -177,10 +183,9 @@ const handleSubmit = async (e: React.FormEvent) => {
 
               {/* Requisitos */}
               <div className="space-y-2">
-                <Label htmlFor="requisitos">Requisitos (um por linha)</Label>
+                <Label className="text-white">Requisitos</Label>
                 <Textarea
-                  id="requisitos"
-                  placeholder="Conhecimento em Python&#10;Noções de estatística&#10;Disponibilidade de 20h semanais"
+                  className="bg-white/5 border-white/20 text-white placeholder-white/40 backdrop-blur-md"
                   value={projeto.requisitos}
                   onChange={(e) => setProjeto({ ...projeto, requisitos: e.target.value })}
                   rows={4}
@@ -189,53 +194,44 @@ const handleSubmit = async (e: React.FormEvent) => {
 
               {/* Vagas */}
               <div className="space-y-2">
-                <Label htmlFor="vagas">Número de Vagas *</Label>
+                <Label className="text-white">Número de Vagas *</Label>
                 <Input
-                  id="vagas"
                   type="number"
-                  min="1"
-                  max="10"
+                  className="bg-white/5 border-white/20 text-white placeholder-white/40 backdrop-blur-md"
                   value={projeto.vagas}
                   onChange={(e) => setProjeto({ ...projeto, vagas: parseInt(e.target.value) })}
-                  required
                 />
               </div>
 
               {/* Bolsa */}
-              <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
+              <div className="space-y-4 p-4 bg-white/5 border border-white/10 rounded-xl backdrop-blur-md">
                 <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="possui-bolsa" className="text-base">
-                      Possui Bolsa de IC?
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Marque se o projeto oferece bolsa para os estudantes
-                    </p>
+                  <div>
+                    <Label className="text-white text-lg">Possui Bolsa?</Label>
+                    <p className="text-sm text-white/60">Marque se há bolsa disponível</p>
                   </div>
+
                   <Switch
-                    id="possui-bolsa"
                     checked={projeto.possuiBolsa}
                     onCheckedChange={(checked) => setProjeto({ ...projeto, possuiBolsa: checked })}
                   />
                 </div>
 
                 {projeto.possuiBolsa && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
+                  <div className="grid md:grid-cols-2 gap-4 pt-4 border-t border-white/10">
                     <div className="space-y-2">
-                      <Label htmlFor="valor-bolsa">Valor Mensal da Bolsa</Label>
+                      <Label className="text-white">Valor da Bolsa</Label>
                       <Input
-                        id="valor-bolsa"
-                        placeholder="Ex: R$ 400,00"
+                        className="bg-white/5 border-white/20 text-white placeholder-white/40 backdrop-blur-md"
                         value={projeto.valorBolsa}
                         onChange={(e) => setProjeto({ ...projeto, valorBolsa: e.target.value })}
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="agencia">Agência Financiadora</Label>
+                      <Label className="text-white">Agência Financiadora</Label>
                       <Input
-                        id="agencia"
-                        placeholder="Ex: CNPq, FAPESP, CAPES"
+                        className="bg-white/5 border-white/20 text-white placeholder-white/40 backdrop-blur-md"
                         value={projeto.agenciaFinanciadora}
                         onChange={(e) => setProjeto({ ...projeto, agenciaFinanciadora: e.target.value })}
                       />
@@ -246,40 +242,33 @@ const handleSubmit = async (e: React.FormEvent) => {
 
               {/* Tags */}
               <div className="space-y-2">
-                <Label htmlFor="tags">Tags (separadas por vírgula)</Label>
+                <Label className="text-white">Tags</Label>
                 <Input
-                  id="tags"
-                  placeholder="Ex: Machine Learning, Python, TensorFlow, Deep Learning"
+                  className="bg-white/5 border-white/20 text-white placeholder-white/40 backdrop-blur-md"
                   value={projeto.tags}
                   onChange={(e) => setProjeto({ ...projeto, tags: e.target.value })}
                 />
-                <p className="text-xs text-muted-foreground">
-                  Use tags para facilitar a busca do seu projeto
-                </p>
               </div>
 
-              {/* Submit Button */}
+              {/* BUTTONS */}
               <div className="flex gap-4 pt-4">
                 <Button
                   type="submit"
-                  variant="hero"
-                  size="lg"
-                  className="flex-1"
-                  disabled={isLoading}
+                  className="flex-1 bg-gradient-to-r from-purple-500 to-blue-600 text-white shadow-lg hover:shadow-xl hover:scale-[1.02] transition"
                 >
                   <Save className="w-4 h-4 mr-2" />
                   {isLoading ? "Publicando..." : "Publicar Projeto"}
                 </Button>
-                
+
                 <Button
                   type="button"
-                  variant="outline"
-                  size="lg"
                   onClick={() => navigate("/projetos")}
+                  className="border border-white/20 bg-white/10 text-white hover:bg-white/20 backdrop-blur-md"
                 >
                   Cancelar
                 </Button>
               </div>
+
             </form>
           </CardContent>
         </Card>
