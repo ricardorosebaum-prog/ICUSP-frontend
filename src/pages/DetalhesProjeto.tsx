@@ -32,6 +32,7 @@ const DetalhesProjeto = () => {
 
   const [projeto, setProjeto] = useState<ProjetoIC>();
   const [loading, setLoading] = useState(true);
+  const userType = localStorage.getItem("userType");
 
   interface ProfessorData {
     id: number;
@@ -232,34 +233,40 @@ const DetalhesProjeto = () => {
           <div className="space-y-6">
             {/* Candidatar */}
             <Card className="bg-white/10 backdrop-blur-xl border border-white/10 shadow-xl rounded-2xl">
-              <CardHeader>
-                <CardTitle className="text-white">Candidatar-se</CardTitle>
-                <CardDescription className="text-white/70">
-                  Interessado neste projeto?
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
+            <CardHeader>
+              <CardTitle className="text-white">Candidatar-se</CardTitle>
+              <CardDescription className="text-white/70">
+                Interessado neste projeto?
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent>
+
+              {/* BOTÃO APENAS PARA ALUNO */}
+              {userType === "aluno" && (
                 <Button
                   onClick={handleCandidatar}
                   className="w-full bg-gradient-to-r from-purple-500 to-blue-600 text-white shadow-lg hover:scale-[1.02] transition"
                 >
                   Enviar Candidatura
                 </Button>
+              )}
 
-                <Link to={`/chat-projeto/${id}`}>
-                  <Button
-                    className="w-full mt-3 bg-white/15 text-white border border-white/30 hover:bg-white/25 backdrop-blur-lg shadow"
-                  >
-                    <Users className="w-4 h-4 mr-2" />
-                    Chat do Projeto
-                  </Button>
-                </Link>
+              <Link to={`/chat-projeto/${id}`}>
+                <Button
+                  className="w-full mt-3 bg-white/15 text-white border border-white/30 hover:bg-white/25 backdrop-blur-lg shadow"
+                >
+                  <Users className="w-4 h-4 mr-2" />
+                  Chat do Projeto
+                </Button>
+              </Link>
 
-                <p className="text-xs text-white/60 text-center mt-3">
-                  Sua candidatura será enviada ao orientador
-                </p>
-              </CardContent>
-            </Card>
+              <p className="text-xs text-white/60 text-center mt-3">
+                Sua candidatura será enviada ao orientador
+              </p>
+
+            </CardContent>
+          </Card>
 
             {/* Contato */}
             <Card className="bg-white/10 backdrop-blur-xl border border-white/10 shadow-xl rounded-2xl">
@@ -282,10 +289,6 @@ const DetalhesProjeto = () => {
                       {projeto.professor?.email || "Sem email informado"}
                     </span>
                   </div>
-                  <div className="flex items-center">
-                    <Phone className="w-4 h-4 mr-3 text-white/50" />
-                    <span className="text-sm">(00) 90000-0000</span>
-                  </div>
                 </div>
 
                 <Separator className="bg-white/10" />
@@ -303,7 +306,7 @@ const DetalhesProjeto = () => {
             <Card className="bg-white/10 backdrop-blur-xl border border-white/10 shadow-xl rounded-2xl">
               <CardHeader>
                 <CardTitle className="text-white">
-                  Tecnologias & Temas
+                  Temas
                 </CardTitle>
               </CardHeader>
               <CardContent>

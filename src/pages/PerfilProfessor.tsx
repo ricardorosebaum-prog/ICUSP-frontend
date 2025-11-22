@@ -156,7 +156,7 @@ const PerfilProfessor = () => {
 
               {/* Dados */}
               <div className="flex-1">
-                <h1 className="text-4xl font-bold">{professor.nome}</h1>
+                <h1 className="text-indigo-100 leading-relaxed">{professor.nome}</h1>
                 <p className="text-indigo-300 font-medium text-lg">{professor.titulo}</p>
                 <p className="text-purple-200/80">{professor.departamento}</p>
 
@@ -196,8 +196,8 @@ const PerfilProfessor = () => {
             <Card key={i} className="bg-white/10 backdrop-blur-xl border-white/10 shadow-lg">
               <CardContent className="p-4 text-center">
                 <item.icon className="w-8 h-8 mx-auto text-indigo-300 mb-2" />
-                <div className="text-3xl font-bold">{item.value}</div>
-                <div className="text-sm text-indigo-200">{item.label}</div>
+                <div className="text-3xl text-white font-bold">{item.value}</div>
+                <div className="text-sm text-indigo-100">{item.label}</div>
               </CardContent>
             </Card>
           ))}
@@ -222,19 +222,35 @@ const PerfilProfessor = () => {
           {/* Sobre */}
           <TabsContent value="sobre">
             <Card className="bg-white/10 backdrop-blur-xl border-white/10 shadow-lg">
-              <CardHeader><CardTitle>Biografia</CardTitle></CardHeader>
+              
+              <CardHeader>
+                <CardTitle className="text-indigo-300 font-bold">
+                  Biografia
+                </CardTitle>
+              </CardHeader>
+
               <CardContent>
-                <p className="text-indigo-100 leading-relaxed mb-6">{professor.bio}</p>
+                <p className="text-white/80 leading-relaxed mb-6">
+                  {professor.bio}
+                </p>
+
                 <Separator className="my-6 bg-white/20" />
 
-                <h3 className="text-lg font-semibold mb-4">Áreas de Interesse</h3>
+                <h3 className="text-lg font-semibold mb-4 text-indigo-300 font-bold">
+                  Áreas de Interesse
+                </h3>
+
                 <div className="flex flex-wrap gap-2">
                   {professor.areasInteresse.map((area, i) => (
-                    <Badge key={i} className="bg-indigo-600/40 text-indigo-100 border border-indigo-400/40">
+                    <Badge 
+                      key={i} 
+                      className="bg-indigo-600/40 text-indigo-100 border border-indigo-400/40"
+                    >
                       {area}
                     </Badge>
                   ))}
                 </div>
+
               </CardContent>
             </Card>
           </TabsContent>
@@ -245,10 +261,10 @@ const PerfilProfessor = () => {
               {professor.projetos.map((p) => (
                 <Card key={p.id} className="bg-white/10 backdrop-blur-xl border-white/10 shadow-lg">
                   <CardHeader>
-                    <div className="flex justify-between items-start">
+                    <div className="flex justify-between items-start text-indigo-300 font-bold">
                       <div>
                         <CardTitle className="text-xl">{p.titulo}</CardTitle>
-                        <div className="flex gap-4 mt-1 text-sm text-indigo-200">
+                        <div className="flex gap-4 mt-1 text-sm text-indigo-100">
                           <Badge className="bg-indigo-600/40 text-indigo-100 border border-indigo-300/40">
                             {p.status}
                           </Badge>
@@ -277,9 +293,9 @@ const PerfilProfessor = () => {
                   <CardContent className="p-6">
                     <h3 className="font-semibold text-white mb-1">{pub.titulo}</h3>
                     <div className="flex items-center gap-4 text-sm text-indigo-200">
-                      <span>{pub.revista}</span>
-                      <span>{pub.ano}</span>
-                      <Badge className="bg-purple-600/40 text-purple-100 border border-purple-400/40">
+                    <span className="text-indigo-100">{pub.revista}</span>
+                    <span className="text-indigo-100">{pub.ano}</span>
+                    <Badge className="bg-purple-500/40 text-purple-50 border border-purple-200/30">
                         {pub.citacoes} citações
                       </Badge>
                     </div>
@@ -299,8 +315,8 @@ const PerfilProfessor = () => {
                       <GraduationCap className="w-6 h-6 text-indigo-300 mt-1" />
                       <div>
                         <h3 className="font-semibold text-white">{form.titulo}</h3>
-                        <p className="text-indigo-200">{form.instituicao}</p>
-                        <p className="text-indigo-300 text-sm">{form.ano}</p>
+                        <p className="text-indigo-100">{form.instituicao}</p>
+                        <p className="text-indigo-50 text-sm">{form.ano}</p>
                       </div>
                     </div>
                   </CardContent>
