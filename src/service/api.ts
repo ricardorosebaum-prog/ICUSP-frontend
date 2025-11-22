@@ -9,6 +9,9 @@ export async function apiPost(url: string, data: unknown) {
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
+
+    console.log("Erro backend:", err);
+
     throw new Error(err.message || "Erro na requisição");
   }
 

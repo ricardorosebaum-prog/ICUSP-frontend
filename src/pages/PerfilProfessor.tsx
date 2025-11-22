@@ -22,7 +22,6 @@ import Navbar from "@/components/Navbar";
 const PerfilProfessor = () => {
   const { id } = useParams();
 
-  // Mock data for professors
   const professores = {
     "1": {
       id: "1",
@@ -109,154 +108,129 @@ const PerfilProfessor = () => {
 
   if (!professor) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-gradient-to-br from-[#0a0f1f] via-[#141433] to-[#2a0b59] text-white">
         <Navbar />
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold">Professor não encontrado</h2>
-            <Link to="/projetos">
-              <Button className="mt-4">Voltar aos projetos</Button>
-            </Link>
-          </div>
+        <div className="max-w-4xl mx-auto px-4 py-8 text-center">
+          <h2 className="text-2xl font-bold">Professor não encontrado</h2>
+          <Link to="/projetos">
+            <Button className="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white">
+              Voltar aos projetos
+            </Button>
+          </Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-[#0a0f1f] via-[#141433] to-[#2a0b59] text-white">
       <Navbar />
       
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Back Button */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+        {/* Voltar */}
         <div className="mb-6">
           <Link to="/projetos">
-            <Button variant="ghost" className="flex items-center space-x-2">
+            <Button 
+              variant="ghost"
+              className="flex items-center space-x-2 text-indigo-300 hover:text-white hover:bg-white/10"
+            >
               <ArrowLeft className="w-4 h-4" />
               <span>Voltar aos projetos</span>
             </Button>
           </Link>
         </div>
 
-        {/* Header Profile */}
-        <Card className="bg-gradient-card shadow-medium mb-8">
+        {/* Header */}
+        <Card className="bg-white/10 border-white/10 backdrop-blur-xl shadow-xl mb-8">
           <CardContent className="p-8">
             <div className="flex flex-col md:flex-row gap-6">
-              <Avatar className="w-32 h-32">
+              
+              {/* Avatar */}
+              <Avatar className="w-32 h-32 ring-2 ring-indigo-400/40">
                 <AvatarImage src={professor.foto} alt={professor.nome} />
-                <AvatarFallback className="text-2xl">
+                <AvatarFallback className="text-2xl bg-indigo-600/50 text-white">
                   {professor.nome.split(' ').map(n => n[0]).join('')}
                 </AvatarFallback>
               </Avatar>
-              
+
+              {/* Dados */}
               <div className="flex-1">
-                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                  <div>
-                    <h1 className="text-3xl font-bold text-foreground mb-2">
-                      {professor.nome}
-                    </h1>
-                    <p className="text-lg text-primary font-medium mb-1">
-                      {professor.titulo}
-                    </p>
-                    <p className="text-muted-foreground mb-4">
-                      {professor.departamento}
-                    </p>
-                    
-                    {/* Contact Info */}
-                    <div className="space-y-2 text-sm text-muted-foreground">
-                      <div className="flex items-center">
-                        <Mail className="w-4 h-4 mr-2" />
-                        {professor.email}
-                      </div>
-                      <div className="flex items-center">
-                        <Phone className="w-4 h-4 mr-2" />
-                        {professor.telefone}
-                      </div>
-                      <div className="flex items-center">
-                        <MapPin className="w-4 h-4 mr-2" />
-                        {professor.sala}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex flex-col gap-2">
-                    <Link to={`/chat/${professor.id}`}>
-                      <Button variant="hero" className="flex items-center space-x-2">
-                        <MessageCircle className="w-4 h-4" />
-                        <span>Iniciar Chat</span>
-                      </Button>
-                    </Link>
-                    <Button variant="outline" className="flex items-center space-x-2">
-                      <Mail className="w-4 h-4" />
-                      <span>Enviar Email</span>
+                <h1 className="text-4xl font-bold">{professor.nome}</h1>
+                <p className="text-indigo-300 font-medium text-lg">{professor.titulo}</p>
+                <p className="text-purple-200/80">{professor.departamento}</p>
+
+                {/* Contatos */}
+                <div className="mt-4 space-y-2 text-sm text-indigo-200">
+                  <div className="flex items-center"><Mail className="w-4 h-4 mr-2" />{professor.email}</div>
+                  <div className="flex items-center"><Phone className="w-4 h-4 mr-2" />{professor.telefone}</div>
+                  <div className="flex items-center"><MapPin className="w-4 h-4 mr-2" />{professor.sala}</div>
+                </div>
+
+                <div className="flex flex-col md:flex-row gap-3 mt-6">
+                  <Link to={`/chat/${professor.id}`}>
+                    <Button className="bg-indigo-600 hover:bg-indigo-700 text-white w-full md:w-auto font-semibold shadow-lg">
+                      <MessageCircle className="w-4 h-4 mr-2" />
+                      Iniciar Chat
                     </Button>
-                  </div>
+                  </Link>
+
+                  <Button className="bg-purple-700 hover:bg-purple-800 text-white w-full md:w-auto font-semibold shadow-lg">
+                    <Mail className="w-4 h-4 mr-2" />
+                    Enviar Email
+                  </Button>
                 </div>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <Card className="bg-gradient-card shadow-soft">
-            <CardContent className="p-4 text-center">
-              <BookOpen className="w-8 h-8 mx-auto text-primary mb-2" />
-              <div className="text-2xl font-bold text-foreground">{professor.estatisticas.projetosAtivos}</div>
-              <div className="text-sm text-muted-foreground">Projetos Ativos</div>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-gradient-card shadow-soft">
-            <CardContent className="p-4 text-center">
-              <Users className="w-8 h-8 mx-auto text-accent mb-2" />
-              <div className="text-2xl font-bold text-foreground">{professor.estatisticas.alunosOrientados}</div>
-              <div className="text-sm text-muted-foreground">Alunos Orientados</div>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-gradient-card shadow-soft">
-            <CardContent className="p-4 text-center">
-              <Award className="w-8 h-8 mx-auto text-primary mb-2" />
-              <div className="text-2xl font-bold text-foreground">{professor.estatisticas.publicacoes}</div>
-              <div className="text-sm text-muted-foreground">Publicações</div>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-gradient-card shadow-soft">
-            <CardContent className="p-4 text-center">
-              <ExternalLink className="w-8 h-8 mx-auto text-accent mb-2" />
-              <div className="text-2xl font-bold text-foreground">{professor.estatisticas.citacoes}</div>
-              <div className="text-sm text-muted-foreground">Citações</div>
-            </CardContent>
-          </Card>
+        {/* Estatísticas */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+          {[
+            { icon: BookOpen, label: "Projetos Ativos", value: professor.estatisticas.projetosAtivos },
+            { icon: Users, label: "Alunos Orientados", value: professor.estatisticas.alunosOrientados },
+            { icon: Award, label: "Publicações", value: professor.estatisticas.publicacoes },
+            { icon: ExternalLink, label: "Citações", value: professor.estatisticas.citacoes },
+          ].map((item, i) => (
+            <Card key={i} className="bg-white/10 backdrop-blur-xl border-white/10 shadow-lg">
+              <CardContent className="p-4 text-center">
+                <item.icon className="w-8 h-8 mx-auto text-indigo-300 mb-2" />
+                <div className="text-3xl font-bold">{item.value}</div>
+                <div className="text-sm text-indigo-200">{item.label}</div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
-        {/* Tabs Content */}
+        {/* Tabs */}
         <Tabs defaultValue="sobre" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="sobre">Sobre</TabsTrigger>
-            <TabsTrigger value="projetos">Projetos</TabsTrigger>
-            <TabsTrigger value="publicacoes">Publicações</TabsTrigger>
-            <TabsTrigger value="formacao">Formação</TabsTrigger>
+
+          {/* Lista de abas */}
+          <TabsList className="grid grid-cols-4 bg-white/10 backdrop-blur-xl border border-white/10">
+            {["sobre", "projetos", "publicacoes", "formacao"].map((tab) => (
+              <TabsTrigger
+                key={tab}
+                value={tab}
+                className="text-indigo-200 data-[state=active]:bg-indigo-600 data-[state=active]:text-white"
+              >
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              </TabsTrigger>
+            ))}
           </TabsList>
 
-          <TabsContent value="sobre" className="space-y-6">
-            <Card className="bg-gradient-card shadow-soft">
-              <CardHeader>
-                <CardTitle>Biografia</CardTitle>
-              </CardHeader>
+          {/* Sobre */}
+          <TabsContent value="sobre">
+            <Card className="bg-white/10 backdrop-blur-xl border-white/10 shadow-lg">
+              <CardHeader><CardTitle>Biografia</CardTitle></CardHeader>
               <CardContent>
-                <p className="text-muted-foreground leading-relaxed mb-6">
-                  {professor.bio}
-                </p>
-                
-                <Separator className="my-6" />
-                
+                <p className="text-indigo-100 leading-relaxed mb-6">{professor.bio}</p>
+                <Separator className="my-6 bg-white/20" />
+
                 <h3 className="text-lg font-semibold mb-4">Áreas de Interesse</h3>
                 <div className="flex flex-wrap gap-2">
-                  {professor.areasInteresse.map((area, index) => (
-                    <Badge key={index} variant="secondary">
+                  {professor.areasInteresse.map((area, i) => (
+                    <Badge key={i} className="bg-indigo-600/40 text-indigo-100 border border-indigo-400/40">
                       {area}
                     </Badge>
                   ))}
@@ -265,27 +239,26 @@ const PerfilProfessor = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="projetos" className="space-y-6">
+          {/* Projetos */}
+          <TabsContent value="projetos">
             <div className="grid gap-6">
-              {professor.projetos.map((projeto) => (
-                <Card key={projeto.id} className="bg-gradient-card shadow-soft">
+              {professor.projetos.map((p) => (
+                <Card key={p.id} className="bg-white/10 backdrop-blur-xl border-white/10 shadow-lg">
                   <CardHeader>
                     <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <CardTitle className="text-lg mb-2">{projeto.titulo}</CardTitle>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <Badge className={projeto.status === "Em andamento" ? 
-                            "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300" :
-                            "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300"
-                          }>
-                            {projeto.status}
+                      <div>
+                        <CardTitle className="text-xl">{p.titulo}</CardTitle>
+                        <div className="flex gap-4 mt-1 text-sm text-indigo-200">
+                          <Badge className="bg-indigo-600/40 text-indigo-100 border border-indigo-300/40">
+                            {p.status}
                           </Badge>
-                          <span>{projeto.alunos} alunos</span>
-                          <span>Início: {projeto.inicio}</span>
+                          <span>{p.alunos} alunos</span>
+                          <span>Início: {p.inicio}</span>
                         </div>
                       </div>
-                      <Link to={`/projeto/${projeto.id}`}>
-                        <Button variant="outline" size="sm">
+
+                      <Link to={`/projeto/${p.id}`}>
+                        <Button className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-md">
                           Ver Detalhes
                         </Button>
                       </Link>
@@ -296,16 +269,19 @@ const PerfilProfessor = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="publicacoes" className="space-y-6">
+          {/* Publicações */}
+          <TabsContent value="publicacoes">
             <div className="space-y-4">
-              {professor.publicacoes.map((pub, index) => (
-                <Card key={index} className="bg-gradient-card shadow-soft">
+              {professor.publicacoes.map((pub, i) => (
+                <Card key={i} className="bg-white/10 backdrop-blur-xl border-white/10 shadow-lg">
                   <CardContent className="p-6">
-                    <h3 className="font-semibold text-foreground mb-2">{pub.titulo}</h3>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span className="font-medium">{pub.revista}</span>
+                    <h3 className="font-semibold text-white mb-1">{pub.titulo}</h3>
+                    <div className="flex items-center gap-4 text-sm text-indigo-200">
+                      <span>{pub.revista}</span>
                       <span>{pub.ano}</span>
-                      <Badge variant="outline">{pub.citacoes} citações</Badge>
+                      <Badge className="bg-purple-600/40 text-purple-100 border border-purple-400/40">
+                        {pub.citacoes} citações
+                      </Badge>
                     </div>
                   </CardContent>
                 </Card>
@@ -313,17 +289,18 @@ const PerfilProfessor = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="formacao" className="space-y-6">
+          {/* Formação */}
+          <TabsContent value="formacao">
             <div className="space-y-4">
-              {professor.formacao.map((form, index) => (
-                <Card key={index} className="bg-gradient-card shadow-soft">
+              {professor.formacao.map((form, i) => (
+                <Card key={i} className="bg-white/10 backdrop-blur-xl border-white/10 shadow-lg">
                   <CardContent className="p-6">
-                    <div className="flex items-start space-x-4">
-                      <GraduationCap className="w-6 h-6 text-primary mt-1" />
+                    <div className="flex items-start gap-4">
+                      <GraduationCap className="w-6 h-6 text-indigo-300 mt-1" />
                       <div>
-                        <h3 className="font-semibold text-foreground mb-1">{form.titulo}</h3>
-                        <p className="text-muted-foreground">{form.instituicao}</p>
-                        <p className="text-sm text-muted-foreground">{form.ano}</p>
+                        <h3 className="font-semibold text-white">{form.titulo}</h3>
+                        <p className="text-indigo-200">{form.instituicao}</p>
+                        <p className="text-indigo-300 text-sm">{form.ano}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -331,6 +308,7 @@ const PerfilProfessor = () => {
               ))}
             </div>
           </TabsContent>
+
         </Tabs>
       </div>
     </div>

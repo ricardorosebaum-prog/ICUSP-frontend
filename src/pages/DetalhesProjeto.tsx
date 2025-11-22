@@ -1,6 +1,12 @@
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -27,6 +33,12 @@ const DetalhesProjeto = () => {
   const [projeto, setProjeto] = useState<ProjetoIC>();
   const [loading, setLoading] = useState(true);
 
+  interface ProfessorData {
+    id: number;
+    username: string;
+    email: string;
+  }
+
   interface ProjetoIC {
     id: number;
     titulo: string;
@@ -38,9 +50,9 @@ const DetalhesProjeto = () => {
     tipo_bolsa?: string;
     numero_vagas?: number;
     bolsa_disponivel?: boolean;
-    objetivos?: string;
-    requisitos?: string;
-    professor?: string;
+    objetivos?: string | null;
+    requisitos?: string | null;
+    professor?: ProfessorData | null;
   }
 
   const handleCandidatar = () => {
@@ -94,13 +106,11 @@ const DetalhesProjeto = () => {
       <Navbar />
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-
         {/* Back Button */}
         <div className="mb-8">
           <Link to="/projetos">
             <Button
-              variant="ghost"
-              className="text-white hover:bg-white/10 border border-white/10 px-4 py-2 rounded-xl backdrop-blur-md"
+              className="text-white bg-white/10 hover:bg-white/20 border border-white/30 px-4 py-2 rounded-xl backdrop-blur-lg shadow-lg"
             >
               <ArrowLeft className="w-5 h-5 mr-2" />
               Voltar aos projetos
@@ -111,8 +121,12 @@ const DetalhesProjeto = () => {
         {/* Header */}
         <div className="mb-10 space-y-4">
           <div className="flex flex-wrap gap-3">
-            <Badge className={`${getStatusColor(projeto.status || "")} px-3 py-1 rounded-lg`}>
-              {projeto.status}
+            <Badge
+              className={`${getStatusColor(
+                projeto.status || ""
+              )} px-3 py-1 rounded-lg`}
+            >
+              {projeto.status || "Sem status"}
             </Badge>
 
             <Badge className="bg-white/10 text-white border border-white/20 px-3 py-1 rounded-lg">
@@ -138,7 +152,7 @@ const DetalhesProjeto = () => {
           <div className="flex flex-wrap items-center gap-6 text-white/70">
             <span className="flex items-center">
               <User className="w-5 h-5 mr-2" />
-              {projeto.professor}
+              {projeto.professor?.username || "Sem professor"}
             </span>
 
             <span className="flex items-center">
@@ -150,10 +164,9 @@ const DetalhesProjeto = () => {
 
         {/* Grid layout */}
         <div className="grid gap-8 lg:grid-cols-3">
-
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
-
+            {/* Descrição */}
             <Card className="bg-white/10 backdrop-blur-xl border border-white/10 shadow-xl rounded-2xl">
               <CardHeader>
                 <CardTitle className="flex items-center text-white">
@@ -166,6 +179,7 @@ const DetalhesProjeto = () => {
               </CardContent>
             </Card>
 
+            {/* Objetivos */}
             <Card className="bg-white/10 backdrop-blur-xl border border-white/10 shadow-xl rounded-2xl">
               <CardHeader>
                 <CardTitle className="flex items-center text-white">
@@ -174,19 +188,21 @@ const DetalhesProjeto = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="text-white/80 leading-relaxed">
-                {projeto.objetivos}
+                {projeto.objetivos || "Nenhum objetivo informado."}
               </CardContent>
             </Card>
 
+            {/* Requisitos */}
             <Card className="bg-white/10 backdrop-blur-xl border border-white/10 shadow-xl rounded-2xl">
               <CardHeader>
                 <CardTitle className="text-white">Requisitos</CardTitle>
               </CardHeader>
               <CardContent className="text-white/80 leading-relaxed">
-                {projeto.requisitos}
+                {projeto.requisitos || "Nenhum requisito informado."}
               </CardContent>
             </Card>
 
+            {/* Bolsa */}
             {projeto.bolsa_disponivel && (
               <Card className="bg-green-500/10 backdrop-blur-xl border border-green-400/20 shadow-xl rounded-2xl">
                 <CardHeader>
@@ -199,7 +215,9 @@ const DetalhesProjeto = () => {
                 <CardContent className="space-y-4 text-white/80">
                   <div className="flex justify-between p-3 bg-white/5 border border-white/10 rounded-xl">
                     <span>Bolsa / Agência</span>
-                    <span className="font-semibold">{projeto.tipo_bolsa}</span>
+                    <span className="font-semibold">
+                      {projeto.tipo_bolsa}
+                    </span>
                   </div>
 
                   <p className="text-xs text-white/60">
@@ -208,12 +226,10 @@ const DetalhesProjeto = () => {
                 </CardContent>
               </Card>
             )}
-
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
-
             {/* Candidatar */}
             <Card className="bg-white/10 backdrop-blur-xl border border-white/10 shadow-xl rounded-2xl">
               <CardHeader>
@@ -232,8 +248,7 @@ const DetalhesProjeto = () => {
 
                 <Link to={`/chat-projeto/${id}`}>
                   <Button
-                    variant="outline"
-                    className="w-full mt-3 border-white/20 text-white hover:bg-white/10"
+                    className="w-full mt-3 bg-white/15 text-white border border-white/30 hover:bg-white/25 backdrop-blur-lg shadow"
                   >
                     <Users className="w-4 h-4 mr-2" />
                     Chat do Projeto
@@ -249,17 +264,23 @@ const DetalhesProjeto = () => {
             {/* Contato */}
             <Card className="bg-white/10 backdrop-blur-xl border border-white/10 shadow-xl rounded-2xl">
               <CardHeader>
-                <CardTitle className="text-white">Contato do Orientador</CardTitle>
+                <CardTitle className="text-white">
+                  Contato do Orientador
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 text-white/80">
-                <p className="font-semibold">{projeto.professor}</p>
+                <p className="font-semibold">
+                  {projeto.professor?.username || "Sem nome informado"}
+                </p>
 
                 <Separator className="bg-white/10" />
 
                 <div className="space-y-3">
                   <div className="flex items-center">
                     <Mail className="w-4 h-4 mr-3 text-white/50" />
-                    <span className="text-sm">email@example.com</span>
+                    <span className="text-sm">
+                      {projeto.professor?.email || "Sem email informado"}
+                    </span>
                   </div>
                   <div className="flex items-center">
                     <Phone className="w-4 h-4 mr-3 text-white/50" />
@@ -268,17 +289,22 @@ const DetalhesProjeto = () => {
                 </div>
 
                 <Separator className="bg-white/10" />
-
-                <Button variant="outline" className="w-full border-white/20 text-white hover:bg-white/10">
+              <Link to={`/professor/${projeto.professor.id}`}>
+                <Button
+                  className="w-full bg-white/15 text-white border border-white/30 hover:bg-white/25 backdrop-blur-lg shadow"
+                >
                   Ver Perfil Completo
                 </Button>
+                </Link>
               </CardContent>
             </Card>
 
             {/* Tags */}
             <Card className="bg-white/10 backdrop-blur-xl border border-white/10 shadow-xl rounded-2xl">
               <CardHeader>
-                <CardTitle className="text-white">Tecnologias & Temas</CardTitle>
+                <CardTitle className="text-white">
+                  Tecnologias & Temas
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
@@ -293,7 +319,6 @@ const DetalhesProjeto = () => {
                 </div>
               </CardContent>
             </Card>
-
           </div>
         </div>
       </div>
