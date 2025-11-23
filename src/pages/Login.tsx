@@ -36,6 +36,7 @@ const Login = () => {
       const resposta = await apiPost("http://localhost:8000/api/login/", payload);
       localStorage.setItem("userType", resposta.user.role);
       localStorage.setItem("userName", resposta.user.username);
+      localStorage.setItem("userId", resposta.user.id);
       localStorage.setItem("accessToken", resposta.access_token);
 
       toast({

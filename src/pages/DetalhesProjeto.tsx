@@ -24,7 +24,7 @@ import {
 import Navbar from "@/components/Navbar";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
-import { apiGet } from "@/service/api";
+import { apiGet, apiPostToken } from "@/service/api";
 
 const DetalhesProjeto = () => {
   const { id } = useParams();
@@ -56,12 +56,25 @@ const DetalhesProjeto = () => {
     professor?: ProfessorData | null;
   }
 
-  const handleCandidatar = () => {
+const handleCandidatar = async () => {
+  try {
+    await apiPostToken(
+      "http://localhost:8000/api/iniciacao/interesse/",
+      { iniciacao : projeto.id }  // ou "projeto_id": projeto.id — depende do backend
+    );
+
     toast({
       title: "Candidatura enviada!",
-      description: "Sua candidatura foi enviada com sucesso.",
+      description: "Sua candidatura foi enviada ao orientador.",
     });
-  };
+  } catch (err) {
+    toast({
+      title: "Erro ao enviar candidatura",
+      description: err.message || "Tente novamente mais tarde.",
+      variant: "destructive",
+    });
+  }
+};
 
   const getStatusColor = (status: string) => {
     switch (status) {

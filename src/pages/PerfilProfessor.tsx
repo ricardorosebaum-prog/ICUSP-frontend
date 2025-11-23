@@ -1,137 +1,167 @@
 import { useParams, Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  ArrowLeft, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  BookOpen, 
-  Award, 
-  Users, 
+
+
+import {
+  ArrowLeft,
+  Mail,
+  Phone,
+  MapPin,
+  BookOpen,
+  Award,
+  Users,
   MessageCircle,
   ExternalLink,
   GraduationCap
 } from "lucide-react";
+
 import Navbar from "@/components/Navbar";
+
+import { apiGet } from "@/service/api";
+import { get } from "http";
+
+// ---------------------------------------------
+// TYPES
+// ---------------------------------------------
+
+type ProjetoProfessor = {
+  id: number;
+  titulo: string;
+  status: string;
+  alunos: number;
+  inicio: string;
+};
+
+type Formacao = {
+  titulo: string;
+  instituicao: string;
+  ano: string;
+};
+
+type Estatisticas = {
+  projetosAtivos: number;
+  alunosOrientados: number;
+  publicacoes: number;
+  citacoes: number;
+};
+
+type ProfessorAPI = {
+  id: string;
+  username: string;
+  email: string;
+  iniciacoes?: {
+    id: number;
+    titulo: string;
+    criado_em: string;
+  }[];
+  departamento?: string;
+};
+
+type ProfessorFinal = ProfessorAPI & {
+  foto: string;
+  telefone: string;
+  sala: string;
+  bio: string;
+  areasInteresse: string[];
+  formacao: Formacao[];
+  estatisticas: Estatisticas;
+  nome: string;
+  projetos: ProjetoProfessor[];
+};
+
+// ---------------------------------------------
+// COMPONENTE
+// ---------------------------------------------
 
 const PerfilProfessor = () => {
   const { id } = useParams();
 
-  const professores = {
-    "1": {
-      id: "1",
-      nome: "Prof. Dr. Ana Silva",
-      titulo: "Doutora em Ciência da Computação",
-      departamento: "Departamento de Ciência da Computação",
-      universidade: "Universidade Federal de São Paulo",
-      email: "ana.silva@universidade.edu.br",
-      telefone: "(11) 9999-9999",
-      sala: "Sala 205 - Bloco A",
-      foto: "/placeholder.svg",
-      bio: "Professora e pesquisadora especializada em Inteligência Artificial e Machine Learning com mais de 15 anos de experiência. Líder do Laboratório de IA Aplicada à Saúde, com foco em desenvolvimento de soluções tecnológicas para diagnóstico médico e análise de dados biomédicos.",
-      areasInteresse: [
-        "Machine Learning",
-        "Deep Learning", 
-        "Processamento de Linguagem Natural",
-        "Computer Vision",
-        "IA na Saúde",
-        "Algoritmos Evolutivos"
-      ],
-      formacao: [
-        {
-          titulo: "Doutorado em Ciência da Computação",
-          instituicao: "USP - Universidade de São Paulo",
-          ano: "2010-2014"
-        },
-        {
-          titulo: "Mestrado em Engenharia da Computação", 
-          instituicao: "UNICAMP - Universidade Estadual de Campinas",
-          ano: "2008-2010"
-        },
-        {
-          titulo: "Graduação em Ciência da Computação",
-          instituicao: "UNESP - Universidade Estadual Paulista",
-          ano: "2004-2008"
-        }
-      ],
-      publicacoes: [
-        {
-          titulo: "Machine Learning Applications in Medical Diagnosis: A Comprehensive Review",
-          revista: "IEEE Transactions on Biomedical Engineering",
-          ano: "2023",
-          citacoes: 45
-        },
-        {
-          titulo: "Deep Learning Models for Early Cancer Detection",
-          revista: "Nature Machine Intelligence", 
-          ano: "2022",
-          citacoes: 78
-        },
-        {
-          titulo: "Evolutionary Algorithms for Feature Selection in Medical Data",
-          revista: "Journal of Artificial Intelligence Research",
-          ano: "2021",
-          citacoes: 32
-        }
-      ],
-      projetos: [
-        {
-          id: 1,
-          titulo: "Desenvolvimento de Algoritmos de Machine Learning para Análise de Dados Biomédicos",
-          status: "Em andamento",
-          alunos: 2,
-          inicio: "2024"
-        },
-        {
-          id: 5,
-          titulo: "Sistema de Diagnóstico Automatizado por Imagens Médicas",
-          status: "Recrutando",
-          alunos: 0,
-          inicio: "2024"
-        }
-      ],
-      estatisticas: {
-        projetosAtivos: 2,
-        alunosOrientados: 15,
-        publicacoes: 28,
-        citacoes: 342
-      }
-    }
+  const [professor, setProfessor] = useState<ProfessorFinal | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Usuário logado mock (trocar pelo auth real)
+  const usuarioLogadoId = localStorage.getItem("userId") || null;
+
+  // Mock adicional (enquanto backend não possui esses campos)
+  const extraMockData = {
+    foto: "/placeholder.svg",
+    telefone: "(11) 99999-9999",
+    sala: "Sala 205 - Bloco A",
+    bio: "Biografia não cadastrada ainda. Clique em editar para adicionar.",
+    areasInteresse: ["IA", "Machine Learning", "Web", "Educação"],
+    formacao: [
+      {
+        titulo: "Doutorado em Ciência da Computação",
+        instituicao: "USP",
+        ano: "2011–2015",
+      },
+    ],
+    estatisticas: {
+      projetosAtivos: 2,
+      alunosOrientados: 10,
+      publicacoes: 5,
+      citacoes: 120,
+    },
   };
 
-  const professor = professores[id as keyof typeof professores];
+  useEffect(() => {
+    const fetchProfessor = async () => {
+      try {
+        const data = await apiGet(`http://127.0.0.1:8000/api/professor/${id}/`);
 
-  if (!professor) {
+        const finalProf: ProfessorFinal = {
+          ...data,
+          ...extraMockData,
+          nome: data.username,
+          projetos:
+            data.iniciacoes?.map((i) => ({
+              id: i.id,
+              titulo: i.titulo,
+              status: "Em andamento",
+              alunos: 0,
+              inicio: i.criado_em.slice(0, 4),
+            })) ?? [],
+        };
+
+        setProfessor(finalProf);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfessor();
+  }, [id]);
+
+  if (loading)
+    return <div className="text-white p-10 text-center">Carregando...</div>;
+
+  if (error || !professor)
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0a0f1f] via-[#141433] to-[#2a0b59] text-white">
-        <Navbar />
-        <div className="max-w-4xl mx-auto px-4 py-8 text-center">
-          <h2 className="text-2xl font-bold">Professor não encontrado</h2>
-          <Link to="/projetos">
-            <Button className="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white">
-              Voltar aos projetos
-            </Button>
-          </Link>
-        </div>
+      <div className="text-white p-10 text-center">
+        Erro ao carregar professor
       </div>
     );
-  }
+
+  const isOwner = usuarioLogadoId == professor.id;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a0f1f] via-[#141433] to-[#2a0b59] text-white">
       <Navbar />
-      
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {/* Voltar */}
         <div className="mb-6">
           <Link to="/projetos">
-            <Button 
+            <Button
               variant="ghost"
               className="flex items-center space-x-2 text-indigo-300 hover:text-white hover:bg-white/10"
             >
@@ -145,40 +175,53 @@ const PerfilProfessor = () => {
         <Card className="bg-white/10 border-white/10 backdrop-blur-xl shadow-xl mb-8">
           <CardContent className="p-8">
             <div className="flex flex-col md:flex-row gap-6">
-              
               {/* Avatar */}
               <Avatar className="w-32 h-32 ring-2 ring-indigo-400/40">
                 <AvatarImage src={professor.foto} alt={professor.nome} />
                 <AvatarFallback className="text-2xl bg-indigo-600/50 text-white">
-                  {professor.nome.split(' ').map(n => n[0]).join('')}
+                  {professor.nome[0]}
                 </AvatarFallback>
               </Avatar>
 
               {/* Dados */}
               <div className="flex-1">
-                <h1 className="text-indigo-100 leading-relaxed">{professor.nome}</h1>
-                <p className="text-indigo-300 font-medium text-lg">{professor.titulo}</p>
-                <p className="text-purple-200/80">{professor.departamento}</p>
+                <h1 className="text-indigo-100">{professor.nome}</h1>
+                <p className="text-indigo-300 font-medium text-lg">
+                  {professor.departamento ?? "Departamento não informado"}
+                </p>
 
                 {/* Contatos */}
                 <div className="mt-4 space-y-2 text-sm text-indigo-200">
-                  <div className="flex items-center"><Mail className="w-4 h-4 mr-2" />{professor.email}</div>
-                  <div className="flex items-center"><Phone className="w-4 h-4 mr-2" />{professor.telefone}</div>
-                  <div className="flex items-center"><MapPin className="w-4 h-4 mr-2" />{professor.sala}</div>
+                  <div className="flex items-center">
+                    <Mail className="w-4 h-4 mr-2" />
+                    {professor.email}
+                  </div>
+                  <div className="flex items-center">
+                    <Phone className="w-4 h-4 mr-2" />
+                    {professor.telefone}
+                  </div>
+                  <div className="flex items-center">
+                    <MapPin className="w-4 h-4 mr-2" />
+                    {professor.sala}
+                  </div>
                 </div>
 
                 <div className="flex flex-col md:flex-row gap-3 mt-6">
                   <Link to={`/chat/${professor.id}`}>
-                    <Button className="bg-indigo-600 hover:bg-indigo-700 text-white w-full md:w-auto font-semibold shadow-lg">
+                    <Button className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg">
                       <MessageCircle className="w-4 h-4 mr-2" />
                       Iniciar Chat
                     </Button>
                   </Link>
 
-                  <Button className="bg-purple-700 hover:bg-purple-800 text-white w-full md:w-auto font-semibold shadow-lg">
-                    <Mail className="w-4 h-4 mr-2" />
-                    Enviar Email
-                  </Button>
+                  {/* EDITAR PERFIL — apenas se for o dono da página */}
+                  {isOwner && (
+                    <Link to={`/professor/${professor.id}/editar`}>
+                      <Button className="bg-purple-700 hover:bg-purple-800 text-white shadow-lg">
+                        Editar Perfil
+                      </Button>
+                    </Link>
+                  )}
                 </div>
               </div>
             </div>
@@ -193,7 +236,7 @@ const PerfilProfessor = () => {
             { icon: Award, label: "Publicações", value: professor.estatisticas.publicacoes },
             { icon: ExternalLink, label: "Citações", value: professor.estatisticas.citacoes },
           ].map((item, i) => (
-            <Card key={i} className="bg-white/10 backdrop-blur-xl border-white/10 shadow-lg">
+            <Card key={i} className="bg-white/10 border-white/10 backdrop-blur-xl shadow-lg">
               <CardContent className="p-4 text-center">
                 <item.icon className="w-8 h-8 mx-auto text-indigo-300 mb-2" />
                 <div className="text-3xl text-white font-bold">{item.value}</div>
@@ -205,10 +248,8 @@ const PerfilProfessor = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="sobre" className="space-y-6">
-
-          {/* Lista de abas */}
-          <TabsList className="grid grid-cols-4 bg-white/10 backdrop-blur-xl border border-white/10">
-            {["sobre", "projetos", "publicacoes", "formacao"].map((tab) => (
+          <TabsList className="grid grid-cols-4 bg-white/10 border border-white/10">
+            {["sobre", "projetos", "formacao"].map((tab) => (
               <TabsTrigger
                 key={tab}
                 value={tab}
@@ -219,10 +260,9 @@ const PerfilProfessor = () => {
             ))}
           </TabsList>
 
-          {/* Sobre */}
+          {/* SOBRE */}
           <TabsContent value="sobre">
-            <Card className="bg-white/10 backdrop-blur-xl border-white/10 shadow-lg">
-              
+            <Card className="bg-white/10 border-white/10 backdrop-blur-xl">
               <CardHeader>
                 <CardTitle className="text-indigo-300 font-bold">
                   Biografia
@@ -230,51 +270,55 @@ const PerfilProfessor = () => {
               </CardHeader>
 
               <CardContent>
-                <p className="text-white/80 leading-relaxed mb-6">
-                  {professor.bio}
-                </p>
+                <p className="text-white/80">{professor.bio}</p>
+
+                {isOwner && (
+                  <Link to={`/professor/${professor.id}/editar#bio`}>
+                    <Button className="mt-4 bg-indigo-600 text-white">
+                      Editar Biografia
+                    </Button>
+                  </Link>
+                )}
 
                 <Separator className="my-6 bg-white/20" />
 
-                <h3 className="text-lg font-semibold mb-4 text-indigo-300 font-bold">
+                <h3 className="text-indigo-300 font-bold mb-4">
                   Áreas de Interesse
                 </h3>
 
                 <div className="flex flex-wrap gap-2">
                   {professor.areasInteresse.map((area, i) => (
-                    <Badge 
-                      key={i} 
+                    <Badge
+                      key={i}
                       className="bg-indigo-600/40 text-indigo-100 border border-indigo-400/40"
                     >
                       {area}
                     </Badge>
                   ))}
                 </div>
-
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* Projetos */}
+          {/* PROJETOS */}
           <TabsContent value="projetos">
             <div className="grid gap-6">
               {professor.projetos.map((p) => (
-                <Card key={p.id} className="bg-white/10 backdrop-blur-xl border-white/10 shadow-lg">
+                <Card key={p.id} className="bg-white/10 border-white/10 backdrop-blur-xl shadow-lg">
                   <CardHeader>
-                    <div className="flex justify-between items-start text-indigo-300 font-bold">
+                    <div className="flex justify-between text-indigo-300 font-bold">
                       <div>
                         <CardTitle className="text-xl">{p.titulo}</CardTitle>
+
                         <div className="flex gap-4 mt-1 text-sm text-indigo-100">
-                          <Badge className="bg-indigo-600/40 text-indigo-100 border border-indigo-300/40">
-                            {p.status}
-                          </Badge>
+                          <Badge>{p.status}</Badge>
                           <span>{p.alunos} alunos</span>
                           <span>Início: {p.inicio}</span>
                         </div>
                       </div>
 
                       <Link to={`/projeto/${p.id}`}>
-                        <Button className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-md">
+                        <Button className="bg-indigo-600 text-white">
                           Ver Detalhes
                         </Button>
                       </Link>
@@ -285,31 +329,11 @@ const PerfilProfessor = () => {
             </div>
           </TabsContent>
 
-          {/* Publicações */}
-          <TabsContent value="publicacoes">
-            <div className="space-y-4">
-              {professor.publicacoes.map((pub, i) => (
-                <Card key={i} className="bg-white/10 backdrop-blur-xl border-white/10 shadow-lg">
-                  <CardContent className="p-6">
-                    <h3 className="font-semibold text-white mb-1">{pub.titulo}</h3>
-                    <div className="flex items-center gap-4 text-sm text-indigo-200">
-                    <span className="text-indigo-100">{pub.revista}</span>
-                    <span className="text-indigo-100">{pub.ano}</span>
-                    <Badge className="bg-purple-500/40 text-purple-50 border border-purple-200/30">
-                        {pub.citacoes} citações
-                      </Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-
-          {/* Formação */}
+          {/* FORMAÇÃO */}
           <TabsContent value="formacao">
             <div className="space-y-4">
               {professor.formacao.map((form, i) => (
-                <Card key={i} className="bg-white/10 backdrop-blur-xl border-white/10 shadow-lg">
+                <Card key={i} className="bg-white/10 border-white/10 backdrop-blur-xl">
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4">
                       <GraduationCap className="w-6 h-6 text-indigo-300 mt-1" />
@@ -323,8 +347,15 @@ const PerfilProfessor = () => {
                 </Card>
               ))}
             </div>
-          </TabsContent>
 
+            {isOwner && (
+              <Link to={`/professor/${professor.id}/editar#formacao`}>
+                <Button className="mt-4 bg-indigo-600 text-white">
+                  Editar Formação
+                </Button>
+              </Link>
+            )}
+          </TabsContent>
         </Tabs>
       </div>
     </div>
@@ -332,3 +363,4 @@ const PerfilProfessor = () => {
 };
 
 export default PerfilProfessor;
+

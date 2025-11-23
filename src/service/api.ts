@@ -39,6 +39,23 @@ export async function apiPostToken(url: string, data: unknown) {
 }
 
 export async function apiGet(url: string) {
+
+  const res = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || "Erro na requisição");
+  }
+
+  return res.json();
+}
+
+export async function apiGetToken(url: string) {
   const token = localStorage.getItem("accessToken");
 
   const res = await fetch(url, {
