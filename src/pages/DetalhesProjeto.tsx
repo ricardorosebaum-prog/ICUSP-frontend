@@ -24,7 +24,8 @@ import {
 import Navbar from "@/components/Navbar";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
-import { apiGet, apiPostToken } from "@/service/api";
+import { apiGet, apiPostToken, apiGetToken, apiDeleteToken } from "@/service/api";
+
 
 const DetalhesProjeto = () => {
   const { id } = useParams();
@@ -32,6 +33,7 @@ const DetalhesProjeto = () => {
 
   const [projeto, setProjeto] = useState<ProjetoIC>();
   const [loading, setLoading] = useState(true);
+  const [interesseId, setInteresseId] = useState<number | null>(null);
   const userType = localStorage.getItem("userType");
 
   interface ProfessorData {
@@ -56,25 +58,76 @@ const DetalhesProjeto = () => {
     professor?: ProfessorData | null;
   }
 
-const handleCandidatar = async () => {
-  try {
-    await apiPostToken(
-      "http://localhost:8000/api/iniciacao/interesse/",
-      { iniciacao : projeto.id }  // ou "projeto_id": projeto.id — depende do backend
-    );
 
-    toast({
-      title: "Candidatura enviada!",
-      description: "Sua candidatura foi enviada ao orientador.",
-    });
-  } catch (err) {
-    toast({
-      title: "Erro ao enviar candidatura",
-      description: err.message || "Tente novamente mais tarde.",
-      variant: "destructive",
-    });
-  }
-};
+  // 🔹 Buscar interesses do aluno e verificar se tem interesse neste projeto
+
+  const handleRemoverInteresse = async () => {
+    try {
+      await apiDeleteToken(
+        `http://localhost:8000/api/iniciacao/interesse/remover/${interesseId}/`
+      );
+
+      setInteresseId(null);
+
+      toast({
+        title: "Interesse removido",
+        description: "Você deixou de demonstrar interesse neste projeto.",
+      });
+    } catch (err: any) {
+      toast({
+        title: "Erro ao remover interesse",
+        description: err.message,
+        variant: "destructive",
+      });
+    }
+  };  
+
+  useEffect(() => {
+    if (!projeto?.id) return;
+
+    async function fetchInteresses() {
+      try {
+        const interesses = await apiGetToken(
+          "http://localhost:8000/api/iniciacao/interesse/listar/"
+        );
+        const interesseAtual = interesses.find(
+          (item: any) => item.iniciacao === projeto.id
+        );
+
+        if (interesseAtual) {
+          setInteresseId(interesseAtual.id);
+        }
+      } catch (err) {
+        console.error("Erro ao buscar interesses:", err);
+      }
+    }
+
+    fetchInteresses();
+  }, [projeto, interesseId]);
+
+  const handleCandidatar = async () => {
+    try {
+      const resp = await apiPostToken(
+        "http://localhost:8000/api/iniciacao/interesse/",
+        { iniciacao: projeto?.id }
+      );
+
+      setInteresseId(resp.id);
+
+      toast({
+        title: "Interesse registrado!",
+        description: "Você demonstrou interesse no projeto.",
+      });
+    } catch (err: any) {
+      toast({
+        title: "Erro ao enviar interesse",
+        description: err.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -255,15 +308,23 @@ const handleCandidatar = async () => {
 
             <CardContent>
 
-              {/* BOTÃO APENAS PARA ALUNO */}
-              {userType === "aluno" && (
-                <Button
-                  onClick={handleCandidatar}
-                  className="w-full bg-gradient-to-r from-purple-500 to-blue-600 text-white shadow-lg hover:scale-[1.02] transition"
-                >
-                  Enviar Candidatura
-                </Button>
-              )}
+             {userType === "aluno" && (
+                  interesseId ? (
+                    <Button
+                      onClick={handleRemoverInteresse}
+                      className="w-full bg-red-600 hover:bg-red-700 text-white shadow-lg transition"
+                    >
+                      Remover Interesse
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={handleCandidatar}
+                      className="w-full bg-gradient-to-r from-purple-500 to-blue-600 text-white shadow-lg hover:scale-[1.02] transition"
+                    >
+                      Enviar Candidatura
+                    </Button>
+                  )
+                )}
 
               <Link to={`/chat-projeto/${id}`}>
                 <Button

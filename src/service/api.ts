@@ -73,3 +73,22 @@ export async function apiGetToken(url: string) {
 
   return res.json();
 }
+
+export async function apiDeleteToken(url: string) {
+  const token = localStorage.getItem("accessToken");
+
+  const res = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token && { Authorization: `Bearer ${token}` }),
+    },
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || "Erro na requisição");
+  }
+
+  return res.json();
+}
