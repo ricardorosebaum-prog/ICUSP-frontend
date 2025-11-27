@@ -39,7 +39,7 @@ type UserBrief = {
 };
 
 const Chat = () => {
-  const { userId } = useParams<{ userId: string }>();
+  const { professorId } = useParams<{ professorId: string }>();
   const { toast } = useToast();
 
   const [mensagem, setMensagem] = useState("");
@@ -57,55 +57,68 @@ const Chat = () => {
 
   const fetchPartnerFromMessages = (msgs: MessageResp[]) => {
     for (const m of msgs) {
-      if (`${m.remetente}` === userId && m.remetente_username) {
+      if (`${m.remetente}` === professorId && m.remetente_username) {
         return { id: m.remetente, username: m.remetente_username, role: m.remetente_role };
       }
-      if (`${m.destinatario}` === userId && m.destinatario_username) {
+      if (`${m.destinatario}` === professorId && m.destinatario_username) {
         return { id: m.destinatario, username: m.destinatario_username, role: m.destinatario_role };
       }
     }
     return null;
   };
 
-const loadMessages = async () => {
-  if (!userId) return;
+  const loadMessages = useCallback(async () => {
+    if (!professorId) return;
 
-  try {
-    const data = await apiGetToken(`http://localhost:8000/api/chat/${userId}/`);
-    setMensagens(data as MessageResp[]);
+    try {
+      // Depuração: indicar que vamos chamar o endpoint de listagem
+      console.debug("Chat.loadMessages -> chamando /api/chat/listar/", { professorId });
+      // Lista todas as mensagens do backend e filtramos localmente
+      const all = (await apiGetToken(`http://localhost:8000/api/chat/listar/`)) as MessageResp[];
 
-    // identificar id do outro participante
-    const otherId = data
-      ?.map((m: any) => m.sender)
-      .find((id: number) => id !== Number(userId));
+      // Mostrar apenas mensagens que envolvem o professor cujo id veio por parâmetro
+      const filtered = (all || []).filter(
+        (m) => Number(m.destinatario) === Number(professorId) || Number(m.remetente) === Number(professorId)
+      );
 
-    // buscar o usuário do outro lado
-    if (otherId && !partner) {
-      const userData = await apiGetToken(`http://localhost:8000/api/users/${otherId}/`);
-      setPartner(userData);
+      setMensagens(filtered);
+
+      // Se ainda não temos os dados do parceiro, tentamos buscar pelo próprio userId (é o professor)
+      if (!partner) {
+        try {
+          const userData = await apiGetToken(`http://localhost:8000/api/professor/${professorId}/`);
+          setPartner({
+            id: userData.id,
+            username: userData.username || userData.nome || undefined,
+            email: userData.email,
+            foto: userData.foto || userData.avatar || null,
+            role: userData.role,
+          });
+        } catch (e) {
+          // Se não conseguir, seguimos sem partner — não é crítico
+          console.warn("Não foi possível obter dados do usuário parceiro:", e);
+        }
+      }
+
+      setLoading(false);
+    } catch (err) {
+      console.error("Erro ao carregar mensagens:", err);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar as mensagens.",
+        variant: "destructive",
+      });
+
+      setLoading(false);
     }
-
-    setLoading(false);
-    setTimeout(scrollToBottom, 50);
-
-  } catch (err) {
-    console.error("Erro ao carregar mensagens:", err);
-    toast({
-      title: "Erro",
-      description: "Não foi possível carregar as mensagens.",
-      variant: "destructive",
-    });
-
-    setLoading(false);
-  }
-};
+  }, [professorId, partner, toast]);
 
 
 
-const tryFetchUser = async () => {
-  if (!userId) return;
+const tryFetchUser = useCallback(async () => {
+  if (!professorId) return;
   try {
-    const u = await apiGetToken(`http://localhost:8000/api/users/${userId}/`);
+    const u = await apiGetToken(`http://localhost:8000/api/professor/${professorId}/`);
     if (u) {
       setPartner({
         id: u.id,
@@ -118,15 +131,26 @@ const tryFetchUser = async () => {
   } catch (err) {
     console.error("Erro ao buscar usuário:", err);
   }
-};
+}, [professorId]);
+
+  const getErrorMessage = (e: unknown) => {
+    if (!e) return "";
+    if (typeof e === "string") return e;
+    if (e instanceof Error) return e.message;
+    try {
+      return JSON.stringify(e);
+    } catch {
+      return String(e);
+    }
+  };
 
 useEffect(() => {
-  if (!userId) {
+  if (!professorId) {
     setLoading(false);
     return;
   }
 
-  loadMessages(); 
+  loadMessages();
   tryFetchUser();
 
   pollRef.current = window.setInterval(() => {
@@ -136,12 +160,10 @@ useEffect(() => {
   return () => {
     if (pollRef.current) window.clearInterval(pollRef.current);
   };
-}, [userId]);
+}, [professorId, loadMessages, tryFetchUser]);
 
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [mensagens, scrollToBottom]);
+  // removed automatic scrolling on messages updates per user request
 
   const getCurrentUserId = () => {
     return localStorage.getItem("userId")
@@ -149,18 +171,49 @@ useEffect(() => {
       : null;
   };
 
+  const parseCriadoEm = (s?: string) => {
+    if (!s) return new Date();
+    const d = new Date(s);
+    if (!isNaN(d.getTime())) return d;
+
+    // tenta formato BR: DD/MM/YYYY HH:mm
+    const m = String(s).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/);
+    if (m) {
+      const day = Number(m[1]);
+      const month = Number(m[2]) - 1;
+      const year = Number(m[3]);
+      const hour = m[4] ? Number(m[4]) : 0;
+      const minute = m[5] ? Number(m[5]) : 0;
+      return new Date(year, month, day, hour, minute);
+    }
+
+    // fallback
+    return new Date(s);
+  };
+
+  const formatarHora = (dt: Date) =>
+    dt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+
+  const formatarData = (dt: Date) => {
+    const hoje = new Date();
+    const ontem = new Date(hoje);
+    ontem.setDate(hoje.getDate() - 1);
+
+    if (dt.toDateString() === hoje.toDateString()) return "Hoje";
+    if (dt.toDateString() === ontem.toDateString()) return "Ontem";
+    return dt.toLocaleDateString("pt-BR");
+  };
+
   const enviarMensagem = async () => {
-    if (!mensagem.trim() || !userId) return;
+    if (!mensagem.trim() || !professorId) return;
     setSending(true);
 
     try {
-      const created = await apiPostToken(
-        `http://localhost:8000/api/chat/send/`,
-        {
-          destinatario: Number(userId),
-          texto: mensagem.trim(),
-        }
-      );
+      console.debug("Chat.enviarMensagem -> enviando para /api/chat/enviar/", { destinatario: professorId, texto: mensagem });
+      const created = await apiPostToken(`http://localhost:8000/api/chat/enviar/`, {
+        destinatario: Number(professorId),
+        texto: mensagem.trim(),
+      });
 
       setMensagens((prev) => [...prev, created as MessageResp]);
 
@@ -170,12 +223,12 @@ useEffect(() => {
       }
 
       setMensagem("");
-      setTimeout(scrollToBottom, 50);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Erro ao enviar mensagem:", err);
+      const msg = getErrorMessage(err) || "Erro ao enviar a mensagem.";
       toast({
         title: "Erro",
-        description: err.message || "Erro ao enviar a mensagem.",
+        description: msg,
         variant: "destructive",
       });
     } finally {
@@ -218,14 +271,14 @@ useEffect(() => {
           </Link>
         </div>
 
-        <Card className="bg-gradient-card shadow-medium h-[720px] flex flex-col rounded-2xl overflow-hidden">
-          <CardHeader className="border-b bg-card/30 p-4">
+        <Card className="bg-white/10 backdrop-blur-xl border border-white/10 shadow-xl h-[700px] flex flex-col">
+          <CardHeader className="bg-white/5 backdrop-blur-xl border-b border-white/10 rounded-t-lg p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="relative flex items-center">
+                <div className="w-12 h-12 bg-white/10 border border-white/10 rounded-full flex items-center justify-center">
                   <Avatar className="w-12 h-12">
                     {partner?.foto ? (
-                      <AvatarImage src={partner.foto} alt={partner.username} />
+                      <AvatarImage src={partner.foto} alt={partner?.username} />
                     ) : (
                       <AvatarFallback className="text-sm">
                         {partner?.username
@@ -237,32 +290,20 @@ useEffect(() => {
                       </AvatarFallback>
                     )}
                   </Avatar>
-                  <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-background rounded-full" />
                 </div>
 
                 <div>
-                  <CardTitle className="text-lg">
-                    {partner?.username || `Usuário ${userId}`}
-                  </CardTitle>
-                  <p className="text-sm text-white/70">
-                    {partner?.role === "professor"
-                      ? "Professor"
-                      : partner?.role === "aluno"
-                      ? "Aluno"
-                      : ""}
-                  </p>
+                  <CardTitle className="text-lg text-white">{partner?.username || `Usuário ${professorId}`}</CardTitle>
+                  <p className="text-sm text-white/70">{partner?.role === "professor" ? "Professor" : partner?.role === "aluno" ? "Aluno" : ""}</p>
                 </div>
               </div>
 
               <div className="flex items-center space-x-2">
-                <Button variant="ghost" size="sm" className="text-white/80">
+                <Button variant="ghost" size="sm" className="bg-white/10 text-white/80 border border-white/10">
                   <Phone className="w-4 h-4" />
                 </Button>
-                <Button variant="ghost" size="sm" className="text-white/80">
+                <Button variant="ghost" size="sm" className="bg-white/10 text-white/80 border border-white/10">
                   <Video className="w-4 h-4" />
-                </Button>
-                <Button variant="ghost" size="sm" className="text-white/80">
-                  <MoreVertical className="w-4 h-4" />
                 </Button>
               </div>
             </div>
@@ -276,41 +317,66 @@ useEffect(() => {
                 </div>
               )}
 
-              {mensagens.map((msg) => {
+              {mensagens.map((msg, index) => {
                 const currentUserId = getCurrentUserId();
-                const isMine = currentUserId
-                  ? Number(msg.remetente) === currentUserId
-                  : false;
+                const isMine = currentUserId ? Number(msg.remetente) === currentUserId : false;
+                const remetenteNome = msg.remetente_username || (isMine ? "Você" : partner?.username || "Usuário");
+                const papel = msg.remetente_role === "professor" ? "professor" : msg.remetente_role === "aluno" ? "aluno" : "outro";
+
+                const dt = parseCriadoEm(msg.criado_em);
+                const prevDt = index > 0 ? parseCriadoEm(mensagens[index - 1].criado_em) : null;
+                const mostrarData = index === 0 || (prevDt && formatarData(dt) !== formatarData(prevDt));
+                const hora = formatarHora(dt);
 
                 return (
-                  <div
-                    key={msg.id}
-                    className={`flex ${
-                      isMine ? "justify-end" : "justify-start"
-                    }`}
-                  >
-                    <div
-                      className={`max-w-[75%] ${
-                        isMine ? "text-right" : "text-left"
-                      }`}
-                    >
-                      <div
-                        className={`inline-block p-3 rounded-2xl ${
-                          isMine
-                            ? "bg-gradient-to-r from-[#6a5cff] to-[#2fb6ff] text-white"
-                            : "bg-white/7 text-white/90"
-                        }`}
-                      >
-                        <p className="text-sm whitespace-pre-wrap">
-                          {msg.texto}
-                        </p>
+                  <div key={msg.id}>
+                    {mostrarData && (
+                      <div className="flex justify-center mb-4">
+                        <span className="text-xs text-white/70 bg-white/10 px-3 py-1 rounded-full">{formatarData(dt)}</span>
                       </div>
-                      <div
-                        className={`text-xs mt-1 text-white/60 ${
-                          isMine ? "pr-1" : "pl-1"
-                        }`}
-                      >
-                        {msg.criado_em}
+                    )}
+
+                    <div className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
+                      <div className={`flex gap-3 max-w-[75%] ${isMine ? "flex-row-reverse" : "flex-row"}`}>
+                        {!isMine && (
+                          <Avatar className="w-10 h-10 flex-shrink-0">
+                            <AvatarFallback className="text-xs">
+                              {remetenteNome
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")
+                                .substring(0, 2)
+                                .toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                        )}
+
+                        <div className={`flex flex-col ${isMine ? "items-end" : "items-start"}`}>
+                          {!isMine && (
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-sm font-medium text-white">{remetenteNome}</span>
+                              {papel === "professor" && (
+                                <span className="bg-white/10 text-white/80 text-xs px-2 py-0.5 rounded-md">Professor</span>
+                              )}
+                            </div>
+                          )}
+
+                          <div
+                            className={`p-3 rounded-2xl ${
+                              isMine
+                                ? "bg-white/20 text-white"
+                                : papel === "professor"
+                                ? "bg-white/10 border border-white/10"
+                                : "bg-white/5"
+                            }`}
+                          >
+                            <p className="text-sm whitespace-pre-wrap">{msg.texto}</p>
+                          </div>
+
+                          <div className={`text-xs text-white/70 mt-1 ${isMine ? "text-right" : "text-left"}`}>
+                            {hora}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -321,12 +387,12 @@ useEffect(() => {
             </div>
           </CardContent>
 
-          <div className="border-t p-4 bg-card/20">
+          <div className="border-t border-white/10 p-4 bg-white/5 rounded-b-lg">
             <div className="flex items-center space-x-2">
-              <Button variant="ghost" size="sm" className="text-white/80">
+              <Button variant="ghost" size="sm" className="bg-white/5 hover:bg-white/10 border border-white/10 text-white p-2 rounded-md">
                 <Paperclip className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="sm" className="text-white/80">
+              <Button variant="ghost" size="sm" className="bg-white/5 hover:bg-white/10 border border-white/10 text-white p-2 rounded-md">
                 <Smile className="w-4 h-4" />
               </Button>
 
@@ -336,13 +402,13 @@ useEffect(() => {
                   value={mensagem}
                   onChange={(e) => setMensagem(e.target.value)}
                   onKeyPress={onKeyPress}
-                  className="flex-1 text-black/60 placeholder-white/60"
+                  className="flex-1 bg-white/10 border border-white/20 text-white placeholder-white/50 backdrop-blur-sm rounded-lg px-3 py-2"
                 />
                 <Button
                   onClick={enviarMensagem}
                   disabled={!mensagem.trim() || sending}
                   size="sm"
-                  className="px-3 bg-gradient-to-r from-[#6a5cff] to-[#2fb6ff] text-white"
+                  className="px-3 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-lg"
                 >
                   <Send className="w-4 h-4" />
                 </Button>

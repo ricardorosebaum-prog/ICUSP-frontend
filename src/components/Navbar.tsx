@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, User, BookOpen, Home, Plus, LogOut } from "lucide-react";
+import { Menu, X, User, BookOpen, Home, Plus, LogOut, MessageCircle } from "lucide-react";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -63,6 +63,16 @@ const Navbar = () => {
               <BookOpen className="w-4 h-4" />
               <span>Projetos</span>
             </Link>
+
+            {isLoggedIn && (
+              <Link
+                to="/conversas"
+                className="flex items-center space-x-1 text-white/80 hover:text-white transition"
+              >
+                <MessageCircle className="w-4 h-4" />
+                <span>Conversas</span>
+              </Link>
+            )}
 
             {isLoggedIn && userType === "professor" && (
               <Link
@@ -137,6 +147,16 @@ const Navbar = () => {
             >
               Projetos
             </Link>
+
+            {isLoggedIn && (
+              <Link
+                to="/conversas"
+                onClick={() => setIsOpen(false)}
+                className="block px-4 py-2 text-white/80 hover:text-white transition"
+              >
+                Conversas
+              </Link>
+            )}
 
             {isLoggedIn && userType === "professor" && (
               <Link

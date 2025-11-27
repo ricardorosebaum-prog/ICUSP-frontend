@@ -11,6 +11,7 @@ import DetalhesProjeto from "./pages/DetalhesProjeto";
 import PerfilProfessor from "./pages/PerfilProfessor";
 import Chat from "./pages/Chat";
 import ChatColetivo from "./pages/ChatColetivo";
+import ConversasList from "./pages/ConversasList";
 import AdicionarProjeto from "./pages/AdicionarProjeto";
 import NotFound from "./pages/NotFound";
 
@@ -31,6 +32,7 @@ const App = () => (
           <Route path="/professor/:id" element={<PerfilProfessor />} />
           <Route path="/chat/:professorId" element={<Chat />} />
           <Route path="/chat-projeto/:projetoId" element={<ChatColetivo />} />
+          <Route path="/conversas" element={<ConversasList />} />
           <Route path="/adicionar-projeto" element={<AdicionarProjeto />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

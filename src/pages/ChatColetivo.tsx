@@ -20,6 +20,35 @@ interface Mensagem {
   avatar?: string;
 }
 
+  interface ProjetoIC {
+    id: number;
+    titulo: string;
+    area_pesquisa: string;
+    descricao: string;
+    duracao: string;
+    status?: string;
+    tags: string;
+    tipo_bolsa?: string;
+    numero_vagas?: number;
+    bolsa_disponivel?: boolean;
+    objetivos?: string | null;
+    requisitos?: string | null;
+    professor?: ProfessorData | null;
+  }
+
+  interface ProfessorData {
+    id: number;
+    username: string;
+    email: string;
+  }
+
+  interface ProfessorData {
+    id: number;
+    autor: string;
+    texto: string;
+    criado_em: string;
+    post: number;
+  }
 
 const ChatColetivo = () => {
   const { projetoId } = useParams<{ projetoId: string }>();
@@ -35,7 +64,7 @@ const ChatColetivo = () => {
   const userType = (localStorage.getItem("userType") as "aluno" | "professor" | null) || "aluno";
   const userId = localStorage.getItem("userId") || null;
 
-  const [projeto, setProjeto] = useState<any>(null);
+  const [projeto, setProjeto] = useState<ProjetoIC>(null);
   const [loadingProjeto, setLoadingProjeto] = useState(true);
 
    useEffect(() => {
@@ -54,11 +83,11 @@ const ChatColetivo = () => {
       }
     }
     fetchProjeto();
-  }, [projetoId, toast]);
+  }, [projetoId]);
 
 
   // converte mensagem da API para o formato local
-  const parseApiMessage = (m: any): Mensagem => {
+  const parseApiMessage = (m: ProfessorData): Mensagem => {
     // m: { id, autor: "Nome (aluno)", texto, criado_em, post }
     const autorStr: string = m.autor || "Anon";
     // tenta extrair (aluno) ou (professor)
@@ -118,10 +147,7 @@ const ChatColetivo = () => {
     };
   }, [fetchMessages]);
 
-  useEffect(() => {
-    // scroll quando mensagens mudam
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [mensagens]);
+  // auto-scroll removed — do not force scroll when mensagens update
 
   const enviarMensagem = async () => {
     if (!mensagem.trim()) return;

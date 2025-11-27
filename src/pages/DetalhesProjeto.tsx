@@ -73,7 +73,7 @@ const DetalhesProjeto = () => {
         title: "Interesse removido",
         description: "Você deixou de demonstrar interesse neste projeto.",
       });
-    } catch (err: any) {
+    } catch (err) {
       toast({
         title: "Erro ao remover interesse",
         description: err.message,
@@ -91,7 +91,7 @@ const DetalhesProjeto = () => {
           "http://localhost:8000/api/iniciacao/interesse/listar/"
         );
         const interesseAtual = interesses.find(
-          (item: any) => item.iniciacao === projeto.id
+          (item) => item.iniciacao === projeto.id
         );
 
         if (interesseAtual) {
@@ -118,7 +118,7 @@ const DetalhesProjeto = () => {
         title: "Interesse registrado!",
         description: "Você demonstrou interesse no projeto.",
       });
-    } catch (err: any) {
+    } catch (err) {
       toast({
         title: "Erro ao enviar interesse",
         description: err.message,
