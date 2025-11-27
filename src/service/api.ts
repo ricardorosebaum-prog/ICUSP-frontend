@@ -92,3 +92,23 @@ export async function apiDeleteToken(url: string) {
 
   return res.json();
 }
+
+export async function apiPatchToken(url: string, data: unknown) {
+  const token = localStorage.getItem("accessToken");
+
+  const res = await fetch(url, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token && { Authorization: `Bearer ${token}` }),
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || "Erro na requisição");
+  }
+
+  return res.json();
+}

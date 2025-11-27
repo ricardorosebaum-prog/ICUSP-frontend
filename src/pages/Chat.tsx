@@ -85,18 +85,54 @@ const Chat = () => {
 
       // Se ainda não temos os dados do parceiro, tentamos buscar pelo próprio userId (é o professor)
       if (!partner) {
-        try {
-          const userData = await apiGetToken(`http://localhost:8000/api/professor/${professorId}/`);
-          setPartner({
-            id: userData.id,
-            username: userData.username || userData.nome || undefined,
-            email: userData.email,
-            foto: userData.foto || userData.avatar || null,
-            role: userData.role,
-          });
-        } catch (e) {
-          // Se não conseguir, seguimos sem partner — não é crítico
-          console.warn("Não foi possível obter dados do usuário parceiro:", e);
+        const currentUserId = localStorage.getItem("userId")
+          ? Number(localStorage.getItem("userId"))
+          : null;
+
+        let inferred: UserBrief | null = null;
+
+        if (filtered.length > 0) {
+          for (const m of filtered) {
+            // se sabemos o id do usuário logado, o parceiro é a outra ponta da mensagem
+            if (currentUserId !== null) {
+              if (Number(m.remetente) !== currentUserId) {
+                inferred = { id: m.remetente, username: m.remetente_username, role: m.remetente_role };
+                break;
+              }
+              if (Number(m.destinatario) !== currentUserId) {
+                inferred = { id: m.destinatario, username: m.destinatario_username, role: m.destinatario_role };
+                break;
+              }
+            } else {
+              // fallback: usar professorId param (rota espera professor)
+              if (`${m.remetente}` === professorId && m.remetente_username) {
+                inferred = { id: m.remetente, username: m.remetente_username, role: m.remetente_role };
+                break;
+              }
+              if (`${m.destinatario}` === professorId && m.destinatario_username) {
+                inferred = { id: m.destinatario, username: m.destinatario_username, role: m.destinatario_role };
+                break;
+              }
+            }
+          }
+        }
+
+        if (inferred) {
+          setPartner(inferred);
+        } else {
+          // último recurso: tentar buscar via endpoint do professor (mantendo compatibilidade atual)
+          try {
+            const userData = await apiGetToken(`http://localhost:8000/api/professor/${professorId}/`);
+            setPartner({
+              id: userData.id,
+              username: userData.username || userData.nome || undefined,
+              email: userData.email,
+              foto: userData.foto || userData.avatar || null,
+              role: userData.role,
+            });
+          } catch (e) {
+            console.warn("Não foi possível obter dados do usuário parceiro:", e);
+          }
         }
       }
 
@@ -260,13 +296,13 @@ useEffect(() => {
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6">
-          <Link to={partner ? `/professor/${partner.id}` : "/projetos"}>
+          <Link to={"/conversas"}>
             <Button
               variant="ghost"
               className="flex items-center space-x-2 text-white/80 hover:text-white"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>Voltar ao perfil</span>
+              <span>Voltar para conversas</span>
             </Button>
           </Link>
         </div>
@@ -366,8 +402,8 @@ useEffect(() => {
                               isMine
                                 ? "bg-white/20 text-white"
                                 : papel === "professor"
-                                ? "bg-white/10 border border-white/10"
-                                : "bg-white/5"
+                                ? "bg-white/12 text-white border border-white/10"
+                                : "bg-white/10 text-white/90"
                             }`}
                           >
                             <p className="text-sm whitespace-pre-wrap">{msg.texto}</p>

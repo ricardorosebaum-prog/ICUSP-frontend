@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -23,8 +24,11 @@ import {
 
 import Navbar from "@/components/Navbar";
 import heroImage from "@/assets/hero-ic.jpg";
+import { apiGet } from "@/service/api";
 
 const Index = () => {
+  const [featuredProjects, setFeaturedProjects] = useState<any[]>([]);
+  const [interesseCounts, setInteresseCounts] = useState<Record<number, number>>({});
   const stats = [
     { label: "Projetos Ativos", value: "150+", icon: BookOpen },
     { label: "Estudantes Participando", value: "500+", icon: Users },
@@ -52,6 +56,66 @@ const Index = () => {
         "Desenvolva habilidades técnicas e científicas através de experiência hands-on.",
     },
   ];
+
+  useEffect(() => {
+    async function loadFeatured() {
+      try {
+        const projetosResp = await apiGet("http://localhost:8000/api/iniciacao/listar/");
+        const interessesResp = await apiGet("http://localhost:8000/api/iniciacao/interesse/listar/");
+
+        // lidar com resposta paginada do DRF: { results: [...] }
+        const projetos = Array.isArray(projetosResp)
+          ? projetosResp
+          : Array.isArray(projetosResp?.results)
+          ? projetosResp.results
+          : [];
+
+        const interesses = Array.isArray(interessesResp)
+          ? interessesResp
+          : Array.isArray(interessesResp?.results)
+          ? interessesResp.results
+          : [];
+
+        const counts: Record<number, number> = {};
+        (interesses || []).forEach((it: any) => {
+          const pid = Number(it.iniciacao ?? it.iniciacao_id ?? it.iniciacao);
+          if (!Number.isNaN(pid)) {
+            if (!counts[pid]) counts[pid] = 0;
+            counts[pid] += 1;
+          }
+        });
+
+        // assoc proj -> count (default 0) and normalize professor name
+        const projsWithCounts = (projetos || []).map((p: any) => ({
+          ...p,
+          _count: counts[p.id] || 0,
+          professor_name: p.professor && typeof p.professor === "object" ? p.professor.username || p.professor.name : p.professor,
+        }));
+
+        if (projsWithCounts.length === 0) {
+          console.warn("Nenhum projeto retornado pela API /iniciacao/listar/");
+        }
+
+        // Sorteio: embaralhar e pegar 3 projetos aleatórios
+        const shuffle = (arr: any[]) => {
+          for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+          }
+        };
+
+        shuffle(projsWithCounts);
+        setFeaturedProjects(projsWithCounts.slice(0, 3));
+        setInteresseCounts(counts);
+      } catch (e) {
+        console.error("Erro ao carregar projetos em destaque:", e);
+      }
+    }
+
+    loadFeatured();
+  }, []);
+
+  const userType = localStorage.getItem("userType");
 
   return (
     <div className="min-h-screen bg-[#0f172a] text-white relative overflow-hidden">
@@ -145,122 +209,7 @@ const Index = () => {
       </div>
     </section>
 
-      {/* PROJETOS DESTAQUE */}
-{/* PROJETOS EM DESTAQUE */}
-<section className="relative py-20 px-6 md:px-12 lg:px-20">
-  {/* Título */}
-  <div className="flex items-center justify-between mb-10">
-    <div>
-      <h2 className="text-4xl font-bold text-white drop-shadow-lg">Projetos em Destaque</h2>
-      <p className="text-lg text-white/80 mt-2">
-        Descubra pesquisas inovadoras prontas para você
-      </p>
-    </div>
 
-    {/* Botão ver todos */}
-    <button
-      className="px-6 py-3 rounded-xl font-medium 
-                 bg-white/10 text-white backdrop-blur-md
-                 border border-white/20 shadow-lg
-                 transition-all hover:bg-white/20 hover:shadow-xl"
-    >
-      Ver Todos →
-    </button>
-  </div>
-
-  {/* GRID */}
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-    
-    {/* CARD 1 */}
-    <div className="p-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl
-                    shadow-[0_0_35px_-5px_rgba(0,0,0,0.4)] transition-all hover:border-white/20">
-      
-      <div className="flex gap-3 mb-6">
-        <span className="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-sm">
-          Inteligência Artificial
-        </span>
-        <span className="px-3 py-1 bg-green-500/20 text-green-300 rounded-full text-sm">
-          Recrutando
-        </span>
-      </div>
-
-      {/* Nome do projeto com alto contraste */}
-      <h3 className="text-2xl font-bold text-white mb-2">
-        Machine Learning para Biomedicina
-      </h3>
-
-      <p className="text-white/70 mb-6">Prof. Dr. Ana Silva</p>
-
-      {/* BOTÃO */}
-      <button
-        className="w-full py-3 rounded-xl font-medium 
-                   bg-gradient-to-r from-[#6a5cff] to-[#2fb6ff]
-                   text-white shadow-lg transition-all
-                   hover:shadow-[0_0_20px_#6a5cff]"
-      >
-        Ver Detalhes
-      </button>
-    </div>
-
-    {/* CARD 2 */}
-    <div className="p-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl
-                    shadow-[0_0_35px_-5px_rgba(0,0,0,0.4)] transition-all hover:border-white/20">
-      
-      <div className="flex gap-3 mb-6">
-        <span className="px-3 py-1 bg-cyan-500/20 text-cyan-300 rounded-full text-sm">
-          Engenharia Ambiental
-        </span>
-        <span className="px-3 py-1 bg-yellow-500/20 text-yellow-300 rounded-full text-sm">
-          Em andamento
-        </span>
-      </div>
-
-      <h3 className="text-2xl font-bold text-white mb-2">
-        Sustentabilidade Industrial
-      </h3>
-
-      <p className="text-white/70 mb-6">Prof. Dr. Carlos Santos</p>
-
-      <button
-        className="w-full py-3 rounded-xl font-medium 
-                   bg-gradient-to-r from-[#6a5cff] to-[#2fb6ff]
-                   text-white shadow-lg transition-all
-                   hover:shadow-[0_0_20px_#6a5cff]"
-      >
-        Ver Detalhes
-      </button>
-    </div>
-
-    {/* CARD 3 */}
-    <div className="p-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl
-                    shadow-[0_0_35px_-5px_rgba(0,0,0,0.4)] transition-all hover:border-white/20">
-      
-      <div className="flex gap-3 mb-6">
-        <span className="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-sm">
-          Tecnologia Educacional
-        </span>
-        <span className="px-3 py-1 bg-green-500/20 text-green-300 rounded-full text-sm">
-          Recrutando
-        </span>
-      </div>
-
-      <h3 className="text-2xl font-bold text-white mb-2">
-        Apps para Educação Inclusiva
-      </h3>
-
-      <p className="text-white/70 mb-6">Prof. Dra. Maria Oliveira</p>
-
-      <button
-        className="w-full py-3 rounded-xl font-medium 
-                   bg-gradient-to-r from-[#6a5cff] to-[#2fb6ff]
-                   text-white shadow-lg transition-all
-                   hover:shadow-[0_0_20px_#6a5cff]"
-      >
-        Ver Detalhes
-      </button>
-    </div>
-  </div>
-</section>
 
       {/* FOOTER */}
       <footer className="py-14 bg-[#050b15] border-t border-white/10">

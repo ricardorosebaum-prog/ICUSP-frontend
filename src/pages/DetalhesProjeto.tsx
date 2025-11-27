@@ -36,6 +36,17 @@ const DetalhesProjeto = () => {
   const [interesseId, setInteresseId] = useState<number | null>(null);
   const userType = localStorage.getItem("userType");
 
+  interface Interessado {
+    id: number;
+    username: string;
+    email: string;
+    matricula: string;
+    curso: string;
+  }
+
+  const [interessados, setInteressados] = useState<Interessado[]>([]);
+  const [loadingInteressados, setLoadingInteressados] = useState(false);
+
   interface ProfessorData {
     id: number;
     username: string;
@@ -51,6 +62,7 @@ const DetalhesProjeto = () => {
     status?: string;
     tags: string;
     tipo_bolsa?: string;
+    valor_bolsa?: number;
     numero_vagas?: number;
     bolsa_disponivel?: boolean;
     objetivos?: string | null;
@@ -104,6 +116,38 @@ const DetalhesProjeto = () => {
 
     fetchInteresses();
   }, [projeto, interesseId]);
+
+
+  //  Buscar lista de estudantes interessados (visível apenas ao professor dono)
+  useEffect(() => {
+    if (!projeto?.id) return;
+
+    // Só buscar se o usuário for professor e for o professor dono do projeto
+    const loggedUserId = Number(localStorage.getItem("userId"));
+    if (userType !== "professor" || projeto.professor?.id !== loggedUserId) return;
+
+    async function fetchInteressados() {
+      setLoadingInteressados(true);
+      try {
+        const data = await apiGetToken(
+          `http://localhost:8000/api/iniciacao/${projeto.id}/interessados/`
+        );
+
+        setInteressados(data || []);
+      } catch (err) {
+        console.error("Erro ao buscar interessados:", err);
+        toast({
+          title: "Erro ao carregar interessados",
+          description: "Não foi possível obter a lista de alunos interessados.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoadingInteressados(false);
+      }
+    }
+
+    fetchInteressados();
+  }, [projeto, userType, toast]);
 
   const handleCandidatar = async () => {
     try {
@@ -281,7 +325,7 @@ const DetalhesProjeto = () => {
 
                 <CardContent className="space-y-4 text-white/80">
                   <div className="flex justify-between p-3 bg-white/5 border border-white/10 rounded-xl">
-                    <span>Bolsa / Agência</span>
+                    <span>R${projeto.valor_bolsa}</span>
                     <span className="font-semibold">
                       {projeto.tipo_bolsa}
                     </span>
@@ -290,6 +334,44 @@ const DetalhesProjeto = () => {
                   <p className="text-xs text-white/60">
                     A bolsa depende da aprovação e disponibilidade de recursos.
                   </p>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Interessados (apenas visível ao professor dono) - movido para coluna principal */}
+            {userType === "professor" && Number(localStorage.getItem("userId")) === projeto.professor?.id && (
+              <Card className="bg-white/10 backdrop-blur-xl border border-white/10 shadow-xl rounded-2xl mt-4">
+                <CardHeader>
+                  <CardTitle className="text-white">Interessados</CardTitle>
+                  <CardDescription className="text-white/70">
+                    {loadingInteressados ? "Carregando..." : `${interessados.length} estudante(s)`}
+                  </CardDescription>
+                </CardHeader>
+
+                <CardContent className="space-y-3">
+                  {loadingInteressados ? (
+                    <div className="text-white/70">Carregando interessados...</div>
+                  ) : interessados.length === 0 ? (
+                    <div className="text-white/70">Nenhum aluno interessado ainda.</div>
+                  ) : (
+                    <div className="space-y-3">
+                      {interessados.map((i) => (
+                        <div key={i.id} className="p-3 bg-white/5 border border-white/10 rounded-xl">
+                          <div className="flex items-center justify-between">
+                            <div className="font-semibold text-white">{i.username}</div>
+                            <div className="text-xs text-white/60">{i.curso}</div>
+                          </div>
+
+                          <div className="text-xs text-white/60 mt-1">Matrícula: {i.matricula}</div>
+
+                          <div className="flex items-center mt-2 text-sm text-white/70">
+                            <Mail className="w-4 h-4 mr-2" />
+                            <a className="underline" href={`mailto:${i.email}`}>{i.email}</a>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             )}
@@ -375,6 +457,9 @@ const DetalhesProjeto = () => {
                 </Link>
               </CardContent>
             </Card>
+
+            {/* Interessados (apenas visível ao professor dono) */}
+            {/* Moved to main column */}
 
             {/* Tags */}
             <Card className="bg-white/10 backdrop-blur-xl border border-white/10 shadow-xl rounded-2xl">

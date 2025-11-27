@@ -38,19 +38,6 @@ type ProjetoProfessor = {
   inicio: string;
 };
 
-type Formacao = {
-  titulo: string;
-  instituicao: string;
-  ano: string;
-};
-
-type Estatisticas = {
-  projetosAtivos: number;
-  alunosOrientados: number;
-  publicacoes: number;
-  citacoes: number;
-};
-
 type ProfessorAPI = {
   id: string;
   username: string;
@@ -61,6 +48,8 @@ type ProfessorAPI = {
     criado_em: string;
   }[];
   departamento?: string;
+  areas_pesquisa?: string | string[];
+  biografia?: string;
 };
 
 type ProfessorFinal = ProfessorAPI & {
@@ -69,8 +58,6 @@ type ProfessorFinal = ProfessorAPI & {
   sala: string;
   bio: string;
   areasInteresse: string[];
-  formacao: Formacao[];
-  estatisticas: Estatisticas;
   nome: string;
   projetos: ProjetoProfessor[];
 };
@@ -88,6 +75,7 @@ const PerfilProfessor = () => {
 
   // Usuário logado mock (trocar pelo auth real)
   const usuarioLogadoId = localStorage.getItem("userId") || null;
+  const userType = localStorage.getItem("userType") || null;
 
   // Mock adicional (enquanto backend não possui esses campos)
   const extraMockData = {
@@ -116,10 +104,34 @@ const PerfilProfessor = () => {
       try {
         const data = await apiGet(`http://127.0.0.1:8000/api/professor/${id}/`);
 
+        // Mapear dados da API para o formato usado pelo componente
+        const areasFromApi: string[] = [];
+        if (data.areas_pesquisa) {
+          if (Array.isArray(data.areas_pesquisa)) {
+            areasFromApi.push(...data.areas_pesquisa.map(String));
+          } else if (typeof data.areas_pesquisa === "string") {
+            const raw = data.areas_pesquisa.trim();
+            // tenta parsear JSON caso venha como "['a','b']" ou similar
+            if (raw.startsWith("[") && raw.endsWith("]")) {
+              try {
+                const parsed = JSON.parse(raw.replace(/'/g, '"'));
+                if (Array.isArray(parsed)) areasFromApi.push(...parsed.map(String));
+              } catch {
+                // fallback para CSV
+                areasFromApi.push(...raw.split(",").map((s: string) => s.replace(/\[|\]|'/g, "").trim()).filter(Boolean));
+              }
+            } else {
+              areasFromApi.push(...raw.split(",").map((s: string) => s.trim()).filter(Boolean));
+            }
+          }
+        }
+
         const finalProf: ProfessorFinal = {
           ...data,
           ...extraMockData,
           nome: data.username,
+          bio: data.biografia ?? extraMockData.bio,
+          areasInteresse: areasFromApi.length > 0 ? areasFromApi : extraMockData.areasInteresse,
           projetos:
             data.iniciacoes?.map((i) => ({
               id: i.id,
@@ -190,29 +202,43 @@ const PerfilProfessor = () => {
                   {professor.departamento ?? "Departamento não informado"}
                 </p>
 
-                {/* Contatos */}
+                {/* Contatos / Departamento / Áreas de Pesquisa */}
                 <div className="mt-4 space-y-2 text-sm text-indigo-200">
                   <div className="flex items-center">
                     <Mail className="w-4 h-4 mr-2" />
                     {professor.email}
                   </div>
-                  <div className="flex items-center">
-                    <Phone className="w-4 h-4 mr-2" />
-                    {professor.telefone}
-                  </div>
+
                   <div className="flex items-center">
                     <MapPin className="w-4 h-4 mr-2" />
-                    {professor.sala}
+                    <span className="font-medium">{professor.departamento ?? "Departamento não informado"}</span>
+                  </div>
+
+                  <div className="flex items-start">
+                    <BookOpen className="w-4 h-4 mr-2 mt-1" />
+                    <div className="flex flex-wrap gap-2">
+                      {professor.areasInteresse && professor.areasInteresse.length > 0 ? (
+                        professor.areasInteresse.map((area, i) => (
+                          <Badge key={i} className="bg-indigo-600/40 text-indigo-100 border border-indigo-400/40">
+                            {area}
+                          </Badge>
+                        ))
+                      ) : (
+                        <span className="text-indigo-200">Áreas de pesquisa não informadas</span>
+                      )}
+                    </div>
                   </div>
                 </div>
 
                 <div className="flex flex-col md:flex-row gap-3 mt-6">
-                  <Link to={`/chat/${professor.id}`}>
-                    <Button className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg">
-                      <MessageCircle className="w-4 h-4 mr-2" />
-                      Iniciar Chat
-                    </Button>
-                  </Link>
+                  {userType === "aluno" && (
+                    <Link to={`/chat/${professor.id}`}>
+                      <Button className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg">
+                        <MessageCircle className="w-4 h-4 mr-2" />
+                        Iniciar Chat
+                      </Button>
+                    </Link>
+                  )}
 
                   {/* EDITAR PERFIL — apenas se for o dono da página */}
                   {isOwner && (
@@ -228,28 +254,10 @@ const PerfilProfessor = () => {
           </CardContent>
         </Card>
 
-        {/* Estatísticas */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-          {[
-            { icon: BookOpen, label: "Projetos Ativos", value: professor.estatisticas.projetosAtivos },
-            { icon: Users, label: "Alunos Orientados", value: professor.estatisticas.alunosOrientados },
-            { icon: Award, label: "Publicações", value: professor.estatisticas.publicacoes },
-            { icon: ExternalLink, label: "Citações", value: professor.estatisticas.citacoes },
-          ].map((item, i) => (
-            <Card key={i} className="bg-white/10 border-white/10 backdrop-blur-xl shadow-lg">
-              <CardContent className="p-4 text-center">
-                <item.icon className="w-8 h-8 mx-auto text-indigo-300 mb-2" />
-                <div className="text-3xl text-white font-bold">{item.value}</div>
-                <div className="text-sm text-indigo-100">{item.label}</div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
         {/* Tabs */}
         <Tabs defaultValue="sobre" className="space-y-6">
-          <TabsList className="grid grid-cols-4 bg-white/10 border border-white/10">
-            {["sobre", "projetos", "formacao"].map((tab) => (
+          <TabsList className="grid grid-cols-2 bg-white/10 border border-white/10">
+            {["sobre", "projetos"].map((tab) => (
               <TabsTrigger
                 key={tab}
                 value={tab}
@@ -272,13 +280,8 @@ const PerfilProfessor = () => {
               <CardContent>
                 <p className="text-white/80">{professor.bio}</p>
 
-                {isOwner && (
-                  <Link to={`/professor/${professor.id}/editar#bio`}>
-                    <Button className="mt-4 bg-indigo-600 text-white">
-                      Editar Biografia
-                    </Button>
-                  </Link>
-                )}
+
+
 
                 <Separator className="my-6 bg-white/20" />
 
@@ -329,33 +332,8 @@ const PerfilProfessor = () => {
             </div>
           </TabsContent>
 
-          {/* FORMAÇÃO */}
-          <TabsContent value="formacao">
-            <div className="space-y-4">
-              {professor.formacao.map((form, i) => (
-                <Card key={i} className="bg-white/10 border-white/10 backdrop-blur-xl">
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-4">
-                      <GraduationCap className="w-6 h-6 text-indigo-300 mt-1" />
-                      <div>
-                        <h3 className="font-semibold text-white">{form.titulo}</h3>
-                        <p className="text-indigo-100">{form.instituicao}</p>
-                        <p className="text-indigo-50 text-sm">{form.ano}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
 
-            {isOwner && (
-              <Link to={`/professor/${professor.id}/editar#formacao`}>
-                <Button className="mt-4 bg-indigo-600 text-white">
-                  Editar Formação
-                </Button>
-              </Link>
-            )}
-          </TabsContent>
+
         </Tabs>
       </div>
     </div>

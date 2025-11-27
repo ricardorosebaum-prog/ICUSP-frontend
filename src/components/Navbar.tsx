@@ -8,14 +8,17 @@ const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState("");
   const [userType, setUserType] = useState("");
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAuth = () => {
       const type = localStorage.getItem("userType");
       const name = localStorage.getItem("userName");
+      const id = localStorage.getItem("userId");
       setIsLoggedIn(!!type);
       setUserType(type || "");
       setUserName(name || "");
+      setUserId(id);
     };
 
     checkAuth();
@@ -91,9 +94,13 @@ const Navbar = () => {
               <>
                 <span className="text-sm text-white/80">
                   Olá,{" "}
-                  <span className="font-semibold text-white">
-                    {userName.split(" ")[0]}
-                  </span>
+                  {userType === "professor" && userId ? (
+                    <Link to={`/professor/${userId}`} className="font-semibold text-white hover:underline">
+                      {userName.split(" ")[0]}
+                    </Link>
+                  ) : (
+                    <span className="font-semibold text-white">{userName.split(" ")[0]}</span>
+                  )}
                 </span>
 
                 <Button
@@ -173,9 +180,13 @@ const Navbar = () => {
                 <>
                   <p className="text-white/80 mb-2">
                     Olá,{" "}
-                    <span className="text-white font-semibold">
-                      {userName.split(" ")[0]}
-                    </span>
+                    {userType === "professor" && userId ? (
+                      <Link to={`/professor/${userId}`} className="text-white font-semibold hover:underline">
+                        {userName.split(" ")[0]}
+                      </Link>
+                    ) : (
+                      <span className="text-white font-semibold">{userName.split(" ")[0]}</span>
+                    )}
                   </p>
 
                   <Button

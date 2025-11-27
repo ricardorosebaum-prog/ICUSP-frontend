@@ -9,6 +9,7 @@ import Cadastro from "./pages/Cadastro";
 import ProjetosIC from "./pages/ProjetosIC";
 import DetalhesProjeto from "./pages/DetalhesProjeto";
 import PerfilProfessor from "./pages/PerfilProfessor";
+import EditarProfessor from "./pages/EditarProfessor";
 import Chat from "./pages/Chat";
 import ChatColetivo from "./pages/ChatColetivo";
 import ConversasList from "./pages/ConversasList";
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/projetos" element={<ProjetosIC />} />
           <Route path="/projeto/:id" element={<DetalhesProjeto />} />
           <Route path="/professor/:id" element={<PerfilProfessor />} />
+          <Route path="/professor/:id/editar" element={<EditarProfessor />} />
           <Route path="/chat/:professorId" element={<Chat />} />
           <Route path="/chat-projeto/:projetoId" element={<ChatColetivo />} />
           <Route path="/conversas" element={<ConversasList />} />
