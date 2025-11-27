@@ -44,7 +44,7 @@ const ProjetosIC = () => {
   useEffect(() => {
     async function fetchProjetos() {
       try {
-        const data = await apiGet("http://localhost:8000/api/iniciacao/listar/");
+        const data = await apiGet("https://icuspbackend.onrender.com/api/iniciacao/listar/");
         setProjetos(data);
       } catch (err) {
         console.error(err);

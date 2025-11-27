@@ -1,5 +1,7 @@
+import { buildApiUrl } from "@/config";
+
 export async function apiPost(url: string, data: unknown) {
-  const res = await fetch(url, {
+  const res = await fetch(buildApiUrl(url), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -20,8 +22,7 @@ export async function apiPost(url: string, data: unknown) {
 
 export async function apiPostToken(url: string, data: unknown) {
   const token = localStorage.getItem("accessToken");
-
-  const res = await fetch(url, {
+  const res = await fetch(buildApiUrl(url), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -40,7 +41,7 @@ export async function apiPostToken(url: string, data: unknown) {
 
 export async function apiGet(url: string) {
 
-  const res = await fetch(url, {
+  const res = await fetch(buildApiUrl(url), {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -57,8 +58,7 @@ export async function apiGet(url: string) {
 
 export async function apiGetToken(url: string, data?: unknown) {
   const token = localStorage.getItem("accessToken");
-
-  const res = await fetch(url, {
+  const res = await fetch(buildApiUrl(url), {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -76,8 +76,7 @@ export async function apiGetToken(url: string, data?: unknown) {
 
 export async function apiDeleteToken(url: string) {
   const token = localStorage.getItem("accessToken");
-
-  const res = await fetch(url, {
+  const res = await fetch(buildApiUrl(url), {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
@@ -95,8 +94,7 @@ export async function apiDeleteToken(url: string) {
 
 export async function apiPatchToken(url: string, data: unknown) {
   const token = localStorage.getItem("accessToken");
-
-  const res = await fetch(url, {
+  const res = await fetch(buildApiUrl(url), {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",

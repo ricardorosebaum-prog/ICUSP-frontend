@@ -46,7 +46,7 @@ const ConversasList = () => {
 
       try {
         // Buscar todas as mensagens
-        const all = (await apiGetToken(`http://localhost:8000/api/chat/listar/`)) as MessageResp[];
+        const all = (await apiGetToken(`https://icuspbackend.onrender.com/api/chat/listar/`)) as MessageResp[];
 
         // Extrair parceiros únicos — iterar de trás pra frente para pegar a mensagem mais recente primeiro
         const parceirosMap = new Map<number, Conversa>();

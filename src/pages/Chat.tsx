@@ -74,7 +74,7 @@ const Chat = () => {
       // Depuração: indicar que vamos chamar o endpoint de listagem
       console.debug("Chat.loadMessages -> chamando /api/chat/listar/", { professorId });
       // Lista todas as mensagens do backend e filtramos localmente
-      const all = (await apiGetToken(`http://localhost:8000/api/chat/listar/`)) as MessageResp[];
+      const all = (await apiGetToken(`https://icuspbackend.onrender.com/api/chat/listar/`)) as MessageResp[];
 
       // Mostrar apenas mensagens que envolvem o professor cujo id veio por parâmetro
       const filtered = (all || []).filter(
@@ -122,7 +122,7 @@ const Chat = () => {
         } else {
           // último recurso: tentar buscar via endpoint do professor (mantendo compatibilidade atual)
           try {
-            const userData = await apiGetToken(`http://localhost:8000/api/professor/${professorId}/`);
+            const userData = await apiGetToken(`https://icuspbackend.onrender.com/api/professor/${professorId}/`);
             setPartner({
               id: userData.id,
               username: userData.username || userData.nome || undefined,
@@ -154,7 +154,7 @@ const Chat = () => {
 const tryFetchUser = useCallback(async () => {
   if (!professorId) return;
   try {
-    const u = await apiGetToken(`http://localhost:8000/api/professor/${professorId}/`);
+    const u = await apiGetToken(`https://icuspbackend.onrender.com/api/professor/${professorId}/`);
     if (u) {
       setPartner({
         id: u.id,
@@ -246,7 +246,7 @@ useEffect(() => {
 
     try {
       console.debug("Chat.enviarMensagem -> enviando para /api/chat/enviar/", { destinatario: professorId, texto: mensagem });
-      const created = await apiPostToken(`http://localhost:8000/api/chat/enviar/`, {
+      const created = await apiPostToken(`https://icuspbackend.onrender.com/api/chat/enviar/`, {
         destinatario: Number(professorId),
         texto: mensagem.trim(),
       });

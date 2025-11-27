@@ -76,7 +76,7 @@ const DetalhesProjeto = () => {
   const handleRemoverInteresse = async () => {
     try {
       await apiDeleteToken(
-        `http://localhost:8000/api/iniciacao/interesse/remover/${interesseId}/`
+        `https://icuspbackend.onrender.com/api/iniciacao/interesse/remover/${interesseId}/`
       );
 
       setInteresseId(null);
@@ -100,7 +100,7 @@ const DetalhesProjeto = () => {
     async function fetchInteresses() {
       try {
         const interesses = await apiGetToken(
-          "http://localhost:8000/api/iniciacao/interesse/listar/"
+          "https://icuspbackend.onrender.com/api/iniciacao/interesse/listar/"
         );
         const interesseAtual = interesses.find(
           (item) => item.iniciacao === projeto.id
@@ -130,7 +130,7 @@ const DetalhesProjeto = () => {
       setLoadingInteressados(true);
       try {
         const data = await apiGetToken(
-          `http://localhost:8000/api/iniciacao/${projeto.id}/interessados/`
+          `https://icuspbackend.onrender.com/api/iniciacao/${projeto.id}/interessados/`
         );
 
         setInteressados(data || []);
@@ -152,7 +152,7 @@ const DetalhesProjeto = () => {
   const handleCandidatar = async () => {
     try {
       const resp = await apiPostToken(
-        "http://localhost:8000/api/iniciacao/interesse/",
+        "https://icuspbackend.onrender.com/api/iniciacao/interesse/",
         { iniciacao: projeto?.id }
       );
 
@@ -189,7 +189,7 @@ const DetalhesProjeto = () => {
   useEffect(() => {
     async function fetchProjeto() {
       try {
-        const data = await apiGet(`http://localhost:8000/api/iniciacao/${id}/`);
+        const data = await apiGet(`https://icuspbackend.onrender.com/api/iniciacao/${id}/`);
         setProjeto(data);
       } catch (err) {
         toast({

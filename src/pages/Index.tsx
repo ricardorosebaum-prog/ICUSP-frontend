@@ -60,8 +60,8 @@ const Index = () => {
   useEffect(() => {
     async function loadFeatured() {
       try {
-        const projetosResp = await apiGet("http://localhost:8000/api/iniciacao/listar/");
-        const interessesResp = await apiGet("http://localhost:8000/api/iniciacao/interesse/listar/");
+        const projetosResp = await apiGet("https://icuspbackend.onrender.com/api/iniciacao/listar/");
+        const interessesResp = await apiGet("https://icuspbackend.onrender.com/api/iniciacao/interesse/listar/");
 
         // lidar com resposta paginada do DRF: { results: [...] }
         const projetos = Array.isArray(projetosResp)

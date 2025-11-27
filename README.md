@@ -64,6 +64,23 @@ This project is built with:
 
 Simply open [Lovable](https://lovable.dev/projects/cbc8bd91-c4bc-465b-a8d0-4cecaf1b25fb) and click on Share -> Publish.
 
+## Deploy to Render
+
+This project can be deployed as a static site on Render.
+
+1. In the Render dashboard, create a new **Static Site**.
+2. Connect your GitHub repo and set the **Build Command** to `npm run build` and **Publish Directory** to `dist`.
+3. Add an environment variable named `VITE_API_BASE_URL` with value `https://icuspbackend.onrender.com` (or your API URL).
+4. Trigger a deploy. The site will be available at the Render-assigned URL.
+
+Note: the frontend reads the API base URL from `import.meta.env.VITE_API_BASE_URL`. For local development you can create a `.env` file with:
+
+```
+VITE_API_BASE_URL=https://icuspbackend.onrender.com
+```
+
+If you prefer, a `render.yaml` is included to preconfigure a static site on Render.
+
 ## Can I connect a custom domain to my Lovable project?
 
 Yes, you can!

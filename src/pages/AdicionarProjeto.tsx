@@ -61,7 +61,7 @@ const AdicionarProjeto = () => {
         tags: projeto.tags,
       };
 
-      await apiPostToken("http://localhost:8000/api/iniciacao/criar/", payload);
+      await apiPostToken("https://icuspbackend.onrender.com/api/iniciacao/criar/", payload);
 
       toast({
         title: "Projeto criado com sucesso!",

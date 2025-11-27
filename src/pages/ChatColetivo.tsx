@@ -70,7 +70,7 @@ const ChatColetivo = () => {
    useEffect(() => {
     async function fetchProjeto() {
       try {
-        const data = await apiGet(`http://localhost:8000/api/iniciacao/${projetoId}/`);
+        const data = await apiGet(`https://icuspbackend.onrender.com/api/iniciacao/${projetoId}/`);
         setProjeto(data);
       } catch (err) {
         toast({
@@ -112,7 +112,7 @@ const ChatColetivo = () => {
     };
     setLoading(true);
     try {
-      const url = `http://localhost:8000/api/mensagem/listar/`;
+      const url = `https://icuspbackend.onrender.com/api/mensagem/listar/`;
       const data = await apiPostToken(url, payload);
       // espera array
       if (Array.isArray(data)) {
@@ -160,7 +160,7 @@ const ChatColetivo = () => {
     };
 
     try {
-      const res = await apiPostToken("http://localhost:8000/api/mensagem/criar/", payload);
+      const res = await apiPostToken("https://icuspbackend.onrender.com/api/mensagem/criar/", payload);
       // backend retorna a mensagem criada — vamos adicioná-la (ou re-fetch)
       // Preferimos re-fetch para garantir consistência
       setMensagem("");

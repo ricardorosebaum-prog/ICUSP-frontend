@@ -25,7 +25,7 @@ const EditarProfessor = () => {
     async function load() {
       setLoading(true);
       try {
-        const data = await apiGetToken(`http://127.0.0.1:8000/api/professor/${id}/`);
+        const data = await apiGetToken(`https://icuspbackend.onrender.com/api/professor/${id}/`);
         setDepartamento(data.departamento || "");
         // areas_pesquisa pode ser array ou string; normalizar para CSV
         if (Array.isArray(data.areas_pesquisa)) {
@@ -81,7 +81,7 @@ const EditarProfessor = () => {
 
       // Tentativa primária: PATCH com token (para APIs que suportam)
       const token = localStorage.getItem("accessToken");
-      const url = `http://127.0.0.1:8000/api/professor/${id}/`;
+      const url = `https://icuspbackend.onrender.com/api/professor/${id}/`;
 
       let res = await fetch(url, {
         method: "PATCH",

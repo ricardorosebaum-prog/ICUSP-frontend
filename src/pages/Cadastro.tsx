@@ -79,7 +79,7 @@ const Cadastro = () => {
       };
 
       const resposta = await apiPost(
-        "http://localhost:8000/api/signup/aluno/",
+        "https://icuspbackend.onrender.com/api/signup/aluno/",
         payload
       );
 
@@ -134,7 +134,7 @@ const Cadastro = () => {
       };
 
       const resposta = await apiPost(
-        "http://localhost:8000/api/signup/professor/",
+        "https://icuspbackend.onrender.com/api/signup/professor/",
         payload
       );
 

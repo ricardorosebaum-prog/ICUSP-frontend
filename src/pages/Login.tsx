@@ -33,7 +33,7 @@ const Login = () => {
         password: password,
       };
 
-      const resposta = await apiPost("http://localhost:8000/api/login/", payload);
+      const resposta = await apiPost("https://icuspbackend.onrender.com/api/login/", payload);
       localStorage.setItem("userType", resposta.user.role);
       localStorage.setItem("userName", resposta.user.username);
       localStorage.setItem("userId", resposta.user.id);

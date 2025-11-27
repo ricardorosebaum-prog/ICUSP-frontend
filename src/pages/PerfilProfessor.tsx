@@ -102,7 +102,7 @@ const PerfilProfessor = () => {
   useEffect(() => {
     const fetchProfessor = async () => {
       try {
-        const data = await apiGet(`http://127.0.0.1:8000/api/professor/${id}/`);
+        const data = await apiGet(`https://icuspbackend.onrender.com/api/professor/${id}/`);
 
         // Mapear dados da API para o formato usado pelo componente
         const areasFromApi: string[] = [];
