@@ -55,7 +55,7 @@ export async function apiGet(url: string) {
   return res.json();
 }
 
-export async function apiGetToken(url: string) {
+export async function apiGetToken(url: string, data?: unknown) {
   const token = localStorage.getItem("accessToken");
 
   const res = await fetch(url, {

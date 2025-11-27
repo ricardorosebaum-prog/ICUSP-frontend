@@ -245,6 +245,7 @@ const AdicionarProjeto = () => {
                 <Label className="text-white">Tags</Label>
                 <Input
                   className="bg-white/5 border-white/20 text-white placeholder-white/40 backdrop-blur-md"
+                  placeholder="IA, ML,...(separadas por vírgulas)"
                   value={projeto.tags}
                   onChange={(e) => setProjeto({ ...projeto, tags: e.target.value })}
                 />

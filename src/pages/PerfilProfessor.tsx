@@ -94,7 +94,7 @@ const PerfilProfessor = () => {
     foto: "/placeholder.svg",
     telefone: "(11) 99999-9999",
     sala: "Sala 205 - Bloco A",
-    bio: "Biografia não cadastrada ainda. Clique em editar para adicionar.",
+    bio: "Biografia não cadastrada ainda.",
     areasInteresse: ["IA", "Machine Learning", "Web", "Educação"],
     formacao: [
       {
