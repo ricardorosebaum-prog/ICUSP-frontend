@@ -11,9 +11,7 @@ lerna-debug.log*
 # Dependencies
 package-lock.json
 
-dist
-dist-ssr
-*.local
+
 
 # Editor directories and files
 .vscode/*
