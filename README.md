@@ -60,26 +60,75 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
+## Setup After Cloning
+
+When you clone this repository, you need to install dependencies:
+
+```sh
+npm install
+```
+
+Then start the development server:
+
+```sh
+npm run dev
+```
+
+The app will be available at `http://localhost:5173` (or another port if 5173 is in use).
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/cbc8bd91-c4bc-465b-a8d0-4cecaf1b25fb) and click on Share -> Publish.
 
 ## Deploy to Render
 
-This project can be deployed as a static site on Render.
+This project can be deployed as a static site on Render. **Render automatically runs `npm install` before building**, so all dependencies will be installed.
+
+### Option 1: Using render.yaml (Recommended)
+
+The `render.yaml` file is already configured. Simply:
+
+1. Push your code to GitHub.
+2. Go to [Render Dashboard](https://dashboard.render.com/) and create a new **Static Site**.
+3. Connect your GitHub repository.
+4. Render will automatically read `render.yaml` and use the configuration:
+   - Build Command: `npm install && npm run build`
+   - Publish Directory: `dist`
+   - Environment variables from `render.yaml` will be applied.
+5. Deploy! The site will be available at the Render-assigned URL.
+
+### Option 2: Manual Configuration
+
+If you prefer manual setup:
 
 1. In the Render dashboard, create a new **Static Site**.
-2. Connect your GitHub repo and set the **Build Command** to `npm run build` and **Publish Directory** to `dist`.
-3. Add an environment variable named `VITE_API_BASE_URL` with value `https://icuspbackend.onrender.com` (or your API URL).
-4. Trigger a deploy. The site will be available at the Render-assigned URL.
+2. Connect your GitHub repo.
+3. Set:
+   - **Build Command**: `npm install && npm run build`
+   - **Publish Directory**: `dist`
+   - **Environment Variables**:
+     - `VITE_API_BASE_URL` = `https://icuspbackend.onrender.com` (or your API URL)
+4. Deploy.
 
-Note: the frontend reads the API base URL from `import.meta.env.VITE_API_BASE_URL`. For local development you can create a `.env` file with:
+### How it works
+
+- Render automatically runs `npm install` to install all dependencies from `package.json`.
+- Then it runs `npm run build` (which is `vite build`) to generate the `dist` folder.
+- The `dist` folder is served as a static site.
+- The frontend reads `VITE_API_BASE_URL` from the environment variable at build time.
+
+### Environment Variables
+
+The frontend reads the API base URL from `import.meta.env.VITE_API_BASE_URL`. For local development, you can create a `.env` file:
 
 ```
 VITE_API_BASE_URL=https://icuspbackend.onrender.com
 ```
 
-If you prefer, a `render.yaml` is included to preconfigure a static site on Render.
+Or set it when running the build locally:
+```sh
+VITE_API_BASE_URL=https://icuspbackend.onrender.com npm run build
+```
 
 ## Can I connect a custom domain to my Lovable project?
 

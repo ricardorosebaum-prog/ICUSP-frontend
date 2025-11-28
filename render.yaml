@@ -3,7 +3,8 @@ services:
     name: webframe-weaver-frontend
     env: static
     plan: free
-    buildCommand: "npm run build"
+    # Render automatically runs 'npm install' before buildCommand
+    buildCommand: "npm install && npm run build"
     publishPath: "dist"
     envVars:
       - key: VITE_API_BASE_URL
